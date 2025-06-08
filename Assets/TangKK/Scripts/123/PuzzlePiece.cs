@@ -8,21 +8,27 @@ public class PuzzlePiece : MonoBehaviour
     public Vector2 puzzleSize = new Vector2(8, 6);
     public bool canDrag = true;
     
-    [Header("碰撞体设置")]
-    public Vector2 mainColliderSize = new Vector2(8, 6);
-    public bool isMainColliderTrigger = true;
+    [Header("碰撞体设置 - 手动控制")]
+    public bool useCustomCollider = true;
+    public Vector2 customColliderSize = new Vector2(8, 6);
+    public Vector2 colliderOffset = Vector2.zero;
+    public bool isColliderTrigger = true;
+    
+    [Header("边框设置 - 可自定义")]
+    public bool showBorder = true;
+    public Color borderColor = Color.white;
+    public float borderWidth = 0.1f;
+    public bool animatedBorder = true;
+    [Range(0.1f, 5f)]
+    public float animationSpeed = 1f;
+    public Material borderMaterial;  // 可以指定自定义材质
     
     [Header("连接设置")]
     public List<ConnectionPoint> connectionPoints = new List<ConnectionPoint>();
     
-    [Header("视觉组件")]
-    public GameObject puzzleFrame;
-    public SpriteRenderer backgroundRenderer;
-    
     [Header("调试设置")]
     public bool showPlayerFollow = false;
-    public bool showBounds = false;
-    public bool showMainColliderGizmo = true;
+    public bool showGizmos = true;
     
     // 内部状态
     private bool isDragging = false;
@@ -30,6 +36,11 @@ public class PuzzlePiece : MonoBehaviour
     private List<PuzzlePiece> connectedPuzzles = new List<PuzzlePiece>();
     private PuzzleSnapDetector snapDetector;
     private BoxCollider2D mainCollider;
+    
+    // 边框相关
+    private GameObject borderContainer;
+    private List<LineRenderer> borderLines = new List<LineRenderer>();
+    private float animationOffset = 0f;
     
     // 玩家跟随相关
     private List<PlayerFollowInfo> playersFollowInfo = new List<PlayerFollowInfo>();
@@ -57,25 +68,37 @@ public class PuzzlePiece : MonoBehaviour
         }
     }
     
+    void Update()
+    {
+        if (animatedBorder && showBorder)
+        {
+            UpdateBorderAnimation();
+        }
+    }
+    
     void InitializePuzzle()
     {
-        CleanupOldComponents();
+        // 只在需要时清理旧组件
+        if (useCustomCollider)
+        {
+            CleanupOldColliders();
+            SetupCustomCollider();
+        }
         
+        // 设置连接点（如果为空才创建默认的）
         if (connectionPoints.Count == 0)
         {
             CreateDefaultConnectionPoints();
         }
-        else
-        {
-            UpdateConnectionPointPositions();
-        }
         
-        SetupMainCollider();
-        SetupVisualComponents();
-        CreateBoundaryWalls();
+        // 设置边框
+        if (showBorder)
+        {
+            CreateCustomBorder();
+        }
     }
     
-    void CleanupOldComponents()
+    void CleanupOldColliders()
     {
         var oldColliders = GetComponents<Collider2D>();
         for (int i = oldColliders.Length - 1; i >= 0; i--)
@@ -85,12 +108,18 @@ public class PuzzlePiece : MonoBehaviour
                 DestroyImmediate(oldColliders[i]);
             }
         }
+    }
+    
+    void SetupCustomCollider()
+    {
+        if (!useCustomCollider) return;
         
-        Transform oldWalls = transform.Find("BoundaryWalls");
-        if (oldWalls != null)
-        {
-            DestroyImmediate(oldWalls.gameObject);
-        }
+        mainCollider = gameObject.AddComponent<BoxCollider2D>();
+        mainCollider.size = customColliderSize;
+        mainCollider.offset = colliderOffset;
+        mainCollider.isTrigger = isColliderTrigger;
+        
+        Debug.Log($"设置拼图 {puzzleID} 自定义碰撞体: 尺寸{customColliderSize}, 偏移{colliderOffset}, 触发器={isColliderTrigger}");
     }
     
     void CreateDefaultConnectionPoints()
@@ -129,132 +158,110 @@ public class PuzzlePiece : MonoBehaviour
         });
     }
     
-    void UpdateConnectionPointPositions()
+    void CreateCustomBorder()
     {
+        // 清理旧边框
+        if (borderContainer != null)
+        {
+            DestroyImmediate(borderContainer);
+        }
+        
+        borderContainer = new GameObject("BorderContainer");
+        borderContainer.transform.SetParent(transform);
+        borderContainer.transform.localPosition = Vector3.zero;
+        
+        borderLines.Clear();
+        
         float halfWidth = puzzleSize.x * 0.5f;
         float halfHeight = puzzleSize.y * 0.5f;
         
-        foreach (var point in connectionPoints)
+        // 创建四条边框线
+        Vector3[] corners = new Vector3[]
         {
-            switch (point.direction)
+            new Vector3(-halfWidth, -halfHeight, 0), // 左下
+            new Vector3(halfWidth, -halfHeight, 0),  // 右下
+            new Vector3(halfWidth, halfHeight, 0),   // 右上
+            new Vector3(-halfWidth, halfHeight, 0)   // 左上
+        };
+        
+        // 创建四条边
+        CreateBorderLine(corners[0], corners[1]); // 下边
+        CreateBorderLine(corners[1], corners[2]); // 右边
+        CreateBorderLine(corners[2], corners[3]); // 上边
+        CreateBorderLine(corners[3], corners[0]); // 左边
+    }
+    
+    void CreateBorderLine(Vector3 start, Vector3 end)
+    {
+        GameObject lineObj = new GameObject("BorderLine");
+        lineObj.transform.SetParent(borderContainer.transform);
+        lineObj.transform.localPosition = Vector3.zero;
+        
+        LineRenderer line = lineObj.AddComponent<LineRenderer>();
+        
+        // 设置LineRenderer属性
+        if (borderMaterial != null)
+        {
+            line.material = borderMaterial;
+        }
+        else
+        {
+            // 使用默认材质
+            line.material = CreateDefaultBorderMaterial();
+        }
+        
+        // 修复：使用startColor和endColor替代color
+        line.startColor = borderColor;
+        line.endColor = borderColor;
+        line.startWidth = borderWidth;
+        line.endWidth = borderWidth;
+        line.positionCount = 2;
+        line.useWorldSpace = false;
+        line.sortingOrder = 10; // 确保边框在最上层
+        
+        line.SetPosition(0, start);
+        line.SetPosition(1, end);
+        
+        borderLines.Add(line);
+    }
+    
+    Material CreateDefaultBorderMaterial()
+    {
+        // 创建一个简单的虚线材质
+        Material mat = new Material(Shader.Find("Sprites/Default"));
+        
+        // 如果需要虚线效果，可以在这里设置材质属性
+        // 或者你可以提供自己的Shader
+        
+        return mat;
+    }
+    
+    void UpdateBorderAnimation()
+    {
+        if (borderLines.Count == 0) return;
+        
+        animationOffset += animationSpeed * Time.deltaTime;
+        
+        foreach (var line in borderLines)
+        {
+            if (line != null && line.material != null)
             {
-                case ConnectionDirection.Up:
-                    point.localPosition = new Vector2(0, halfHeight);
-                    break;
-                case ConnectionDirection.Down:
-                    point.localPosition = new Vector2(0, -halfHeight);
-                    break;
-                case ConnectionDirection.Left:
-                    point.localPosition = new Vector2(-halfWidth, 0);
-                    break;
-                case ConnectionDirection.Right:
-                    point.localPosition = new Vector2(halfWidth, 0);
-                    break;
+                // 这里可以实现各种动画效果
+                // 例如：颜色变化
+                float alpha = 0.5f + 0.5f * Mathf.Sin(animationOffset);
+                Color animatedColor = borderColor;
+                animatedColor.a = alpha;
+                
+                // 修复：使用startColor和endColor替代color
+                line.startColor = animatedColor;
+                line.endColor = animatedColor;
+                
+                // 如果材质支持，也可以设置UV偏移来实现流动效果
+                if (line.material.HasProperty("_MainTex"))
+                {
+                    line.material.SetTextureOffset("_MainTex", new Vector2(animationOffset * 0.1f, 0));
+                }
             }
-        }
-    }
-    
-    void SetupMainCollider()
-    {
-        mainCollider = gameObject.AddComponent<BoxCollider2D>();
-        mainCollider.size = mainColliderSize;
-        mainCollider.isTrigger = isMainColliderTrigger;
-        
-        Debug.Log($"设置拼图 {puzzleID} 主碰撞体: 尺寸{mainColliderSize}, 触发器={isMainColliderTrigger}");
-    }
-    
-    void SetupVisualComponents()
-    {
-        if (backgroundRenderer != null)
-        {
-            backgroundRenderer.transform.localPosition = Vector3.zero;
-            backgroundRenderer.transform.localScale = new Vector3(puzzleSize.x * 0.9f, puzzleSize.y * 0.9f, 1);
-            backgroundRenderer.sortingOrder = 0;
-        }
-        
-        SetupPuzzleFrame();
-    }
-    
-    void SetupPuzzleFrame()
-    {
-        if (puzzleFrame == null)
-        {
-            CreatePuzzleFrame();
-        }
-        
-        puzzleFrame.transform.localPosition = Vector3.zero;
-        puzzleFrame.transform.localScale = new Vector3(puzzleSize.x, puzzleSize.y, 1);
-        
-        var renderer = puzzleFrame.GetComponent<SpriteRenderer>();
-        if (renderer == null)
-        {
-            renderer = puzzleFrame.AddComponent<SpriteRenderer>();
-            renderer.sprite = CreateFrameSprite();
-        }
-        renderer.sortingOrder = 2;
-    }
-    
-    void CreateBoundaryWalls()
-    {
-        GameObject wallsContainer = new GameObject("BoundaryWalls");
-        wallsContainer.transform.SetParent(transform);
-        wallsContainer.transform.localPosition = Vector3.zero;
-        
-        float wallThickness = 0.1f;
-        float halfWidth = puzzleSize.x * 0.5f;
-        float halfHeight = puzzleSize.y * 0.5f;
-        float connectionGap = 1.2f;
-        
-        // 上墙 - 分成两段，中间留缺口
-        CreateWallSegment(wallsContainer.transform, 
-            new Vector3(-halfWidth * 0.5f, halfHeight, 0), 
-            new Vector2(halfWidth - connectionGap, wallThickness));
-        CreateWallSegment(wallsContainer.transform, 
-            new Vector3(halfWidth * 0.5f, halfHeight, 0), 
-            new Vector2(halfWidth - connectionGap, wallThickness));
-        
-        // 下墙
-        CreateWallSegment(wallsContainer.transform, 
-            new Vector3(-halfWidth * 0.5f, -halfHeight, 0), 
-            new Vector2(halfWidth - connectionGap, wallThickness));
-        CreateWallSegment(wallsContainer.transform, 
-            new Vector3(halfWidth * 0.5f, -halfHeight, 0), 
-            new Vector2(halfWidth - connectionGap, wallThickness));
-        
-        // 左墙 - 分成两段
-        CreateWallSegment(wallsContainer.transform, 
-            new Vector3(-halfWidth, halfHeight * 0.5f, 0), 
-            new Vector2(wallThickness, halfHeight - connectionGap));
-        CreateWallSegment(wallsContainer.transform, 
-            new Vector3(-halfWidth, -halfHeight * 0.5f, 0), 
-            new Vector2(wallThickness, halfHeight - connectionGap));
-        
-        // 右墙
-        CreateWallSegment(wallsContainer.transform, 
-            new Vector3(halfWidth, halfHeight * 0.5f, 0), 
-            new Vector2(wallThickness, halfHeight - connectionGap));
-        CreateWallSegment(wallsContainer.transform, 
-            new Vector3(halfWidth, -halfHeight * 0.5f, 0), 
-            new Vector2(wallThickness, halfHeight - connectionGap));
-    }
-    
-    void CreateWallSegment(Transform parent, Vector3 localPos, Vector2 size)
-    {
-        GameObject wall = new GameObject("WallSegment");
-        wall.transform.SetParent(parent);
-        wall.transform.localPosition = localPos;
-        wall.layer = 9; // Walls层
-        
-        var collider = wall.AddComponent<BoxCollider2D>();
-        collider.size = size;
-        collider.isTrigger = false;
-        
-        if (showBounds)
-        {
-            var renderer = wall.AddComponent<SpriteRenderer>();
-            renderer.sprite = CreateSimpleSprite(Color.red);
-            renderer.sortingOrder = 3;
-            wall.transform.localScale = new Vector3(size.x, size.y, 1);
         }
     }
     
@@ -316,16 +323,12 @@ public class PuzzlePiece : MonoBehaviour
             }
         }
         
-        // 🔑 关键：在尝试自动连接前，不要清空玩家跟随信息
         if (snapDetector != null)
         {
             snapDetector.TryAutoConnect();
         }
         
-        // 连接完成后再更新玩家状态和清空跟随信息
         UpdatePlayersCurrentPuzzle();
-        
-        // 延迟清空，确保吸附完成
         Invoke(nameof(ClearFollowInfo), 0.1f);
         
         if (showPlayerFollow)
@@ -369,7 +372,6 @@ public class PuzzlePiece : MonoBehaviour
         }
     }
     
-    // 🔑 新方法：使用移动距离直接更新玩家位置
     public void UpdateFollowingPlayersWithMovement(Vector3 movement)
     {
         if (showPlayerFollow)
@@ -498,7 +500,7 @@ public class PuzzlePiece : MonoBehaviour
     public bool IsPositionInside(Vector2 position)
     {
         Vector2 localPos = position - (Vector2)transform.position;
-        Vector2 halfSize = mainColliderSize * 0.5f;
+        Vector2 halfSize = puzzleSize * 0.5f;
         
         return Mathf.Abs(localPos.x) <= halfSize.x && Mathf.Abs(localPos.y) <= halfSize.y;
     }
@@ -532,79 +534,36 @@ public class PuzzlePiece : MonoBehaviour
     
     void SetDraggingVisual(bool isDragging)
     {
-        if (puzzleFrame != null)
+        if (showBorder && borderLines.Count > 0)
         {
-            var renderer = puzzleFrame.GetComponent<SpriteRenderer>();
-            if (renderer != null)
+            Color dragColor = isDragging ? Color.yellow : borderColor;
+            foreach (var line in borderLines)
             {
-                renderer.color = isDragging ? Color.yellow : Color.white;
+                if (line != null)
+                {
+                    // 修复：使用startColor和endColor替代color
+                    line.startColor = dragColor;
+                    line.endColor = dragColor;
+                }
             }
         }
     }
     
     public void SetSnapPreview(bool showPreview)
     {
-        if (puzzleFrame != null)
+        if (showBorder && borderLines.Count > 0)
         {
-            var renderer = puzzleFrame.GetComponent<SpriteRenderer>();
-            if (renderer != null)
+            Color snapColor = showPreview ? Color.green : borderColor;
+            foreach (var line in borderLines)
             {
-                renderer.color = showPreview ? Color.green : Color.white;
-            }
-        }
-    }
-    
-    void CreatePuzzleFrame()
-    {
-        GameObject frame = new GameObject("PuzzleFrame");
-        frame.transform.SetParent(transform);
-        frame.transform.localPosition = Vector3.zero;
-        
-        var renderer = frame.AddComponent<SpriteRenderer>();
-        renderer.sprite = CreateFrameSprite();
-        renderer.sortingOrder = 2;
-        
-        puzzleFrame = frame;
-    }
-    
-    Sprite CreateFrameSprite()
-    {
-        int size = 64;
-        int borderWidth = 2;
-        Texture2D texture = new Texture2D(size, size);
-        Color[] pixels = new Color[size * size];
-        
-        for (int x = 0; x < size; x++)
-        {
-            for (int y = 0; y < size; y++)
-            {
-                bool isBorder = x < borderWidth || x >= size - borderWidth || 
-                               y < borderWidth || y >= size - borderWidth;
-                
-                if (isBorder)
+                if (line != null)
                 {
-                    pixels[y * size + x] = Color.white;
-                }
-                else
-                {
-                    pixels[y * size + x] = Color.clear;
+                    // 修复：使用startColor和endColor替代color
+                    line.startColor = snapColor;
+                    line.endColor = snapColor;
                 }
             }
         }
-        
-        texture.SetPixels(pixels);
-        texture.Apply();
-        
-        return Sprite.Create(texture, new Rect(0, 0, size, size), new Vector2(0.5f, 0.5f));
-    }
-    
-    Sprite CreateSimpleSprite(Color color)
-    {
-        Texture2D texture = new Texture2D(1, 1);
-        texture.SetPixel(0, 0, color);
-        texture.Apply();
-        
-        return Sprite.Create(texture, new Rect(0, 0, 1, 1), new Vector2(0.5f, 0.5f));
     }
     
     #endregion
@@ -616,27 +575,26 @@ public class PuzzlePiece : MonoBehaviour
     {
         InitializePuzzle();
         Debug.Log($"拼图 {puzzleID} 重新初始化完成");
-        Debug.Log($"  拼图显示尺寸: {puzzleSize}");
-        Debug.Log($"  主碰撞体尺寸: {mainColliderSize}");
-        Debug.Log($"  主碰撞体触发器: {isMainColliderTrigger}");
     }
     
-    [ContextMenu("更新拼图尺寸")]
-    public void UpdatePuzzleSize()
+    [ContextMenu("更新边框")]
+    public void UpdateBorder()
     {
-        CleanupOldComponents();
-        InitializePuzzle();
-        Debug.Log($"拼图 {puzzleID} 尺寸更新完成");
-    }
-    
-    [ContextMenu("更新主碰撞体")]
-    public void UpdateMainCollider()
-    {
-        if (mainCollider != null)
+        if (showBorder)
         {
-            mainCollider.size = mainColliderSize;
-            mainCollider.isTrigger = isMainColliderTrigger;
-            Debug.Log($"主碰撞体已更新: 尺寸{mainColliderSize}, 触发器={isMainColliderTrigger}");
+            CreateCustomBorder();
+            Debug.Log($"边框已更新");
+        }
+    }
+    
+    [ContextMenu("更新碰撞体")]
+    public void UpdateCollider()
+    {
+        if (useCustomCollider)
+        {
+            CleanupOldColliders();
+            SetupCustomCollider();
+            Debug.Log($"碰撞体已更新: 尺寸{customColliderSize}, 偏移{colliderOffset}");
         }
     }
     
@@ -655,15 +613,18 @@ public class PuzzlePiece : MonoBehaviour
     
     void OnDrawGizmosSelected()
     {
-        // 绘制拼图显示边界
+        if (!showGizmos) return;
+        
+        // 绘制拼图边界
         Gizmos.color = Color.cyan;
         Gizmos.DrawWireCube(transform.position, puzzleSize);
         
-        // 绘制主碰撞体边界
-        if (showMainColliderGizmo)
+        // 绘制自定义碰撞体边界
+        if (useCustomCollider)
         {
-            Gizmos.color = isMainColliderTrigger ? Color.green : Color.red;
-            Gizmos.DrawWireCube(transform.position, mainColliderSize);
+            Gizmos.color = isColliderTrigger ? Color.green : Color.red;
+            Vector3 colliderCenter = transform.position + (Vector3)colliderOffset;
+            Gizmos.DrawWireCube(colliderCenter, customColliderSize);
         }
         
         // 绘制连接点
