@@ -534,7 +534,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 549897655}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: b0dd97463347a6e48882450f38b837f1, type: 3}
   m_Name: 
@@ -646,6 +646,103 @@ SpriteRenderer:
   m_WasSpriteAssigned: 1
   m_MaskInteraction: 0
   m_SpriteSortPoint: 0
+--- !u!1 &1095587018
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1095587020}
+  - component: {fileID: 1095587021}
+  m_Layer: 0
+  m_Name: GameObject (1)
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1095587020
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1095587018}
+  serializedVersion: 2
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 3.5616288, y: -0.25963393, z: 0.013534058}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 2143810594}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1095587021
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1095587018}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 57c077b34fca6f7458874d53d22d20c9, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  moveSpeed: 5
+  playerTransform: {fileID: 549897660}
+  nodes:
+  - nodeName: A
+    position: {x: -7, y: 0}
+    connections:
+    - targetNodeName: B
+      pathType: 1
+      waypoints: []
+    nodeColor: {r: 0, g: 0, b: 0, a: 0}
+  - nodeName: B
+    position: {x: -5, y: 0}
+    connections:
+    - targetNodeName: A
+      pathType: 1
+      waypoints: []
+    - targetNodeName: E
+      pathType: 2
+      waypoints: []
+    - targetNodeName: C
+      pathType: 1
+      waypoints: []
+    - targetNodeName: D
+      pathType: 2
+      waypoints: []
+    nodeColor: {r: 0, g: 0, b: 0, a: 0}
+  - nodeName: C
+    position: {x: -3, y: 0}
+    connections:
+    - targetNodeName: B
+      pathType: 1
+      waypoints: []
+    nodeColor: {r: 0, g: 0, b: 0, a: 0}
+  - nodeName: D
+    position: {x: -5, y: -1.5}
+    connections:
+    - targetNodeName: B
+      pathType: 2
+      waypoints: []
+    nodeColor: {r: 0, g: 0, b: 0, a: 0}
+  - nodeName: E
+    position: {x: -5, y: 1.5}
+    connections:
+    - targetNodeName: B
+      pathType: 2
+      waypoints: []
+    nodeColor: {r: 0, g: 0, b: 0, a: 0}
+  startingNodeName: A
+  showNodeNames: 1
+  showConnections: 1
+  connectionLineColor: {r: 1, g: 0, b: 0.982162, a: 1}
+  currentPathColor: {r: 1, g: 0.92156863, b: 0.015686275, a: 1}
+  nodeRadius: 0.1
 --- !u!213 &1503600076
 Sprite:
   m_ObjectHideFlags: 0
@@ -1026,13 +1123,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5b79015e2da19f84bb26d8ce6fb03c67, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  instructions: "\u53F3\u952E\u70B9\u51FB\u7EC4\u4EF6\u6807\u9898\u9009\u62E9\u83DC\u5355\u9879\uFF0C\u6216\u52FE\u9009\u4E0B\u65B9\u590D\u9009\u6846"
-  createCompleteScene: 0
-  clearScene: 0
-  createPlayer: 0
-  createPuzzleA: 0
-  createPuzzleB: 0
-  showLayerInfo: 0
 --- !u!4 &1603998671
 Transform:
   m_ObjectHideFlags: 0
@@ -1186,6 +1276,7 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 809391731}
+  - {fileID: 1095587020}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1660057539 &9223372036854775807
