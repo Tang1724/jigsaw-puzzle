@@ -1,4 +1,5 @@
 using UnityEngine;
+using System.Collections.Generic;
 
 [RequireComponent(typeof(PathNode))]
 [RequireComponent(typeof(Collider2D))]
@@ -12,9 +13,28 @@ public class PathToggleSwitch : MonoBehaviour
     public PathNode nodeB1;
     public PathNode nodeB2;
 
+    /// 当前拼图块
+    private PuzzlePiece parentPiece;
+
+    /// 当前是否切换状态
     private bool isToggled = false;
+
     private Vector3 enterPosition;
     private bool playerInside = false;
+
+    /// 静态：记录所有开关
+    private static List<PathToggleSwitch> allSwitches = new List<PathToggleSwitch>();
+
+    private void Awake()
+    {
+        parentPiece = GetComponentInParent<PuzzlePiece>();
+        allSwitches.Add(this);
+    }
+
+    private void OnDestroy()
+    {
+        allSwitches.Remove(this);
+    }
 
     void Start()
     {
@@ -30,30 +50,41 @@ public class PathToggleSwitch : MonoBehaviour
     {
         if (!other.CompareTag("Player")) return;
 
+        if (!IsSameGroup(other.gameObject))
+        {
+            Debug.Log("[开关] 玩家与开关不在同一拼图组，忽略触发");
+            return;
+        }
+
         enterPosition = other.transform.position;
         playerInside = true;
-
-        Debug.Log($"[开关] 玩家进入，位置：{enterPosition}");
     }
 
     void OnTriggerExit2D(Collider2D other)
     {
         if (!other.CompareTag("Player") || !playerInside) return;
 
+        if (!IsSameGroup(other.gameObject))
+        {
+            playerInside = false;
+            return;
+        }
+
         Vector3 exitPosition = other.transform.position;
         Vector3 center = GetComponent<Collider2D>().bounds.center;
 
-        // 判断是否“穿越”——穿过中心点的任意方向
         Vector3 toEnter = enterPosition - center;
         Vector3 toExit = exitPosition - center;
 
         float dot = Vector3.Dot(toEnter.normalized, toExit.normalized);
-        bool crossedThrough = dot < 0f; // 如果方向相反（夹角大于 90°），说明穿过了中心
+        bool crossedThrough = dot < 0f;
 
         if (crossedThrough)
         {
             Debug.Log("[开关] 玩家完整穿过，触发路径切换");
-            TogglePath();
+
+            // ✅ 同组联动切换
+            ToggleAllSwitchesInSameGroup();
         }
         else
         {
@@ -63,6 +94,26 @@ public class PathToggleSwitch : MonoBehaviour
         playerInside = false;
     }
 
+    /// <summary>
+    /// 切换所有同组开关
+    /// </summary>
+    void ToggleAllSwitchesInSameGroup()
+    {
+        int myGroupID = parentPiece != null ? parentPiece.GroupID : GetInstanceID();
+
+        foreach (var sw in allSwitches)
+        {
+            if (sw == null) continue;
+            if (sw == this || sw.GetGroupID() == myGroupID)
+            {
+                sw.TogglePath(); // 同组，执行切换
+            }
+        }
+    }
+
+    /// <summary>
+    /// 切换路径状态
+    /// </summary>
     void TogglePath()
     {
         isToggled = !isToggled;
@@ -96,16 +147,31 @@ public class PathToggleSwitch : MonoBehaviour
             if (!a.IsConnectedTo(b))
             {
                 a.ConnectTo(b);
-                Debug.Log($"[路径连接] 启用连接：{a.name} <--> {b.name}");
             }
+            a.SetPathActive(b, true); // ✅ 显示实线
         }
         else
         {
             if (a.IsConnectedTo(b))
             {
-                a.DisconnectFrom(b);
-                Debug.Log($"[路径连接] 断开连接：{a.name} X {b.name}");
+                a.SetPathActive(b, false); // ✅ 显示虚线
             }
         }
+    }
+
+    int GetGroupID()
+    {
+        return parentPiece != null ? parentPiece.GroupID : GetInstanceID();
+    }
+
+    /// <summary>
+    /// 判断玩家是否与开关在同一拼图组合中
+    /// </summary>
+    bool IsSameGroup(GameObject player)
+    {
+        var playerPiece = player.GetComponentInParent<PuzzlePiece>();
+        if (playerPiece == null || parentPiece == null) return false;
+
+        return playerPiece.GroupID == parentPiece.GroupID;
     }
 }

@@ -164,12 +164,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3a77406ca24443d47985edbe82fdeef4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  ownerPuzzle: {fileID: 1517461812}
-  nodeNetwork: {fileID: 62534733}
-  useRelativeCoordinates: 1
-  networkOffset: {x: 0, y: 0}
-  nodesAreAlreadyRelative: 0
-  showDebugInfo: 0
 --- !u!114 &62534733
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -182,46 +176,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 57c077b34fca6f7458874d53d22d20c9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  moveSpeed: 5
-  playerTransform: {fileID: 549897660}
-  isPlayerController: 0
-  nodes:
-  - nodeName: 2
-    position: {x: 0.01, y: 0}
-    connections:
-    - targetNodeName: 1
-      pathType: 1
-      waypoints: []
-    nodeColor: {r: 0, g: 0, b: 0, a: 0}
-    isMergedNode: 0
-    originalNodeNames: []
-    sourceNetworks: []
-  - nodeName: 1
-    position: {x: 4.94, y: 0}
-    connections:
-    - targetNodeName: 2
-      pathType: 1
-      waypoints: []
-    nodeColor: {r: 0, g: 0, b: 0, a: 0}
-    isMergedNode: 0
-    originalNodeNames: []
-    sourceNetworks: []
-  startingNodeName: 1
-  isPuzzleIntegrated: 0
-  networkManager: {fileID: 62534732}
-  followPuzzleMovement: 1
-  enableNodeMerging: 1
-  nodeMergeDistance: 0.1
-  nodeSeparateDistance: 0.1
-  mergedNodeColor: {r: 1, g: 0, b: 1, a: 1}
-  showNodeNames: 1
-  showConnections: 1
-  connectionLineColor: {r: 0, g: 0, b: 1, a: 1}
-  currentPathColor: {r: 1, g: 0.92156863, b: 0.015686275, a: 1}
-  mergedConnectionColor: {r: 0, g: 1, b: 1, a: 1}
-  nodeRadius: 0.3
-  showNetworkDebug: 0
-  showMergeDebug: 1
 --- !u!1 &326254394
 GameObject:
   m_ObjectHideFlags: 0
@@ -431,7 +385,7 @@ Transform:
   m_GameObject: {fileID: 408553433}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalPosition: {x: 2.78, y: 1.73, z: 0}
   m_LocalScale: {x: 5, y: 4, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -642,11 +596,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b0dd97463347a6e48882450f38b837f1, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  moveSpeed: 5
-  wallLayer:
-    serializedVersion: 2
-    m_Bits: 0
-  checkRadius: 0.2
 --- !u!4 &549897660
 Transform:
   m_ObjectHideFlags: 0
@@ -707,46 +656,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 57c077b34fca6f7458874d53d22d20c9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  moveSpeed: 5
-  playerTransform: {fileID: 549897660}
-  isPlayerController: 1
-  nodes:
-  - nodeName: B
-    position: {x: -2.62, y: 0}
-    connections:
-    - targetNodeName: A
-      pathType: 1
-      waypoints: []
-    nodeColor: {r: 0, g: 0, b: 0, a: 0}
-    isMergedNode: 0
-    originalNodeNames: []
-    sourceNetworks: []
-  - nodeName: A
-    position: {x: -7.41, y: 0}
-    connections:
-    - targetNodeName: B
-      pathType: 1
-      waypoints: []
-    nodeColor: {r: 0, g: 0, b: 0, a: 0}
-    isMergedNode: 0
-    originalNodeNames: []
-    sourceNetworks: []
-  startingNodeName: A
-  isPuzzleIntegrated: 0
-  networkManager: {fileID: 723669508}
-  followPuzzleMovement: 1
-  enableNodeMerging: 1
-  nodeMergeDistance: 0.1
-  nodeSeparateDistance: 0.1
-  mergedNodeColor: {r: 1, g: 0, b: 1, a: 1}
-  showNodeNames: 1
-  showConnections: 1
-  connectionLineColor: {r: 0, g: 0, b: 1, a: 1}
-  currentPathColor: {r: 1, g: 0.92156863, b: 0.015686275, a: 1}
-  mergedConnectionColor: {r: 0, g: 1, b: 1, a: 1}
-  nodeRadius: 0.3
-  showNetworkDebug: 0
-  showMergeDebug: 1
 --- !u!114 &723669508
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -759,12 +668,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3a77406ca24443d47985edbe82fdeef4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  ownerPuzzle: {fileID: 2143810593}
-  nodeNetwork: {fileID: 723669507}
-  useRelativeCoordinates: 1
-  networkOffset: {x: 0, y: 0}
-  nodesAreAlreadyRelative: 0
-  showDebugInfo: 0
 --- !u!1 &809391730
 GameObject:
   m_ObjectHideFlags: 0
@@ -852,6 +755,251 @@ SpriteRenderer:
   m_WasSpriteAssigned: 1
   m_MaskInteraction: 0
   m_SpriteSortPoint: 0
+--- !u!1001 &901424265
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 0}
+    m_Modifications:
+    - target: {fileID: 5302747705921468804, guid: 08ef36a67728ab64fa2bb9c3d6e9c8a9, type: 3}
+      propertyPath: m_Name
+      value: Square (3)
+      objectReference: {fileID: 0}
+    - target: {fileID: 6867575094057674634, guid: 08ef36a67728ab64fa2bb9c3d6e9c8a9, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 0.13
+      objectReference: {fileID: 0}
+    - target: {fileID: 6867575094057674634, guid: 08ef36a67728ab64fa2bb9c3d6e9c8a9, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: -2.61
+      objectReference: {fileID: 0}
+    - target: {fileID: 6867575094057674634, guid: 08ef36a67728ab64fa2bb9c3d6e9c8a9, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6867575094057674634, guid: 08ef36a67728ab64fa2bb9c3d6e9c8a9, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 6867575094057674634, guid: 08ef36a67728ab64fa2bb9c3d6e9c8a9, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6867575094057674634, guid: 08ef36a67728ab64fa2bb9c3d6e9c8a9, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6867575094057674634, guid: 08ef36a67728ab64fa2bb9c3d6e9c8a9, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6867575094057674634, guid: 08ef36a67728ab64fa2bb9c3d6e9c8a9, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6867575094057674634, guid: 08ef36a67728ab64fa2bb9c3d6e9c8a9, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6867575094057674634, guid: 08ef36a67728ab64fa2bb9c3d6e9c8a9, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: 08ef36a67728ab64fa2bb9c3d6e9c8a9, type: 3}
+--- !u!114 &930837233 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 6081448363282985643, guid: 08ef36a67728ab64fa2bb9c3d6e9c8a9, type: 3}
+  m_PrefabInstance: {fileID: 901424265}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6a3c3b0295f8d4942960d7d9aea864d6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+--- !u!1 &1002715850
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1002715855}
+  - component: {fileID: 1002715854}
+  - component: {fileID: 1002715853}
+  - component: {fileID: 1002715852}
+  - component: {fileID: 1002715851}
+  m_Layer: 0
+  m_Name: Player (1)
+  m_TagString: Player
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!50 &1002715851
+Rigidbody2D:
+  serializedVersion: 5
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1002715850}
+  m_BodyType: 0
+  m_Simulated: 1
+  m_UseFullKinematicContacts: 0
+  m_UseAutoMass: 0
+  m_Mass: 0.0001
+  m_LinearDamping: 0
+  m_AngularDamping: 0
+  m_GravityScale: 0
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_Interpolate: 0
+  m_SleepingMode: 1
+  m_CollisionDetection: 0
+  m_Constraints: 0
+--- !u!61 &1002715852
+BoxCollider2D:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1002715850}
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Density: 1
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_ForceSendLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_ForceReceiveLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_ContactCaptureLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_CallbackLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_IsTrigger: 1
+  m_UsedByEffector: 0
+  m_CompositeOperation: 0
+  m_CompositeOrder: 0
+  m_Offset: {x: 0, y: 0}
+  m_SpriteTilingProperty:
+    border: {x: 0, y: 0, z: 0, w: 0}
+    pivot: {x: 0.5, y: 0.5}
+    oldSize: {x: 1, y: 1}
+    newSize: {x: 1, y: 1}
+    adaptiveTilingThreshold: 0.5
+    drawMode: 0
+    adaptiveTiling: 0
+  m_AutoTiling: 0
+  m_Size: {x: 1, y: 1}
+  m_EdgeRadius: 0
+--- !u!114 &1002715853
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1002715850}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e6e81e0ccddd6a840a360c15676fe183, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  startNode: {fileID: 930837233}
+  moveSpeed: 2
+--- !u!212 &1002715854
+SpriteRenderer:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1002715850}
+  m_Enabled: 1
+  m_CastShadows: 0
+  m_ReceiveShadows: 0
+  m_DynamicOccludee: 1
+  m_StaticShadowCaster: 0
+  m_MotionVectors: 1
+  m_LightProbeUsage: 1
+  m_ReflectionProbeUsage: 1
+  m_RayTracingMode: 0
+  m_RayTraceProcedural: 0
+  m_RayTracingAccelStructBuildFlagsOverride: 0
+  m_RayTracingAccelStructBuildFlags: 1
+  m_SmallMeshCulling: 1
+  m_RenderingLayerMask: 1
+  m_RendererPriority: 0
+  m_Materials:
+  - {fileID: 2100000, guid: a97c105638bdf8b4a8650670310a4cd3, type: 2}
+  m_StaticBatchInfo:
+    firstSubMesh: 0
+    subMeshCount: 0
+  m_StaticBatchRoot: {fileID: 0}
+  m_ProbeAnchor: {fileID: 0}
+  m_LightProbeVolumeOverride: {fileID: 0}
+  m_ScaleInLightmap: 1
+  m_ReceiveGI: 1
+  m_PreserveUVs: 0
+  m_IgnoreNormalsForChartDetection: 0
+  m_ImportantGI: 0
+  m_StitchLightmapSeams: 1
+  m_SelectedEditorRenderState: 0
+  m_MinimumChartSize: 4
+  m_AutoUVMaxDistance: 0.5
+  m_AutoUVMaxAngle: 89
+  m_LightmapParameters: {fileID: 0}
+  m_SortingLayerID: 0
+  m_SortingLayer: 0
+  m_SortingOrder: 5
+  m_Sprite: {fileID: 7482667652216324306, guid: 311925a002f4447b3a28927169b83ea6, type: 3}
+  m_Color: {r: 1, g: 1, b: 1, a: 1}
+  m_FlipX: 0
+  m_FlipY: 0
+  m_DrawMode: 0
+  m_Size: {x: 1, y: 1}
+  m_AdaptiveModeThreshold: 0.5
+  m_SpriteTileMode: 0
+  m_WasSpriteAssigned: 1
+  m_MaskInteraction: 0
+  m_SpriteSortPoint: 0
+--- !u!4 &1002715855
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1002715850}
+  serializedVersion: 2
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: -6.9399996, y: 2.9900002, z: 0}
+  m_LocalScale: {x: 0.35, y: 0.35, z: 0.35}
+  m_ConstrainProportionsScale: 1
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1103719384
 GameObject:
   m_ObjectHideFlags: 0
@@ -1227,9 +1375,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f6092a5b08d480e4fb059a38ec15259f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  snapDistance: 1
-  snapAngle: 15
-  showSnapDebug: 1
 --- !u!114 &1517461812
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1242,41 +1387,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b343e41bcb82d4a458d1358e3d299e7f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  puzzleID: Puzzle_A
-  puzzleSize: {x: 5, y: 4}
-  canDrag: 1
-  networkManagers: []
-  autoFindNetworks: 1
-  useCustomCollider: 1
-  customColliderSize: {x: 5, y: 4}
-  colliderOffset: {x: 0, y: 0}
-  isColliderTrigger: 1
-  showBorder: 1
-  borderColor: {r: 1, g: 0.99502105, b: 0, a: 1}
-  borderWidth: 0.1
-  animatedBorder: 1
-  animationSpeed: 1
-  borderMaterial: {fileID: 0}
-  connectionPoints:
-  - direction: 0
-    localPosition: {x: 0, y: 2}
-    connectionType: 0
-    isConnected: 0
-  - direction: 1
-    localPosition: {x: 0, y: -2}
-    connectionType: 0
-    isConnected: 0
-  - direction: 2
-    localPosition: {x: -2.5, y: 0}
-    connectionType: 0
-    isConnected: 0
-  - direction: 3
-    localPosition: {x: 2.5, y: 0}
-    connectionType: 0
-    isConnected: 0
-  showPlayerFollow: 0
-  showGizmos: 1
-  showNetworkSync: 0
 --- !u!4 &1517461813
 Transform:
   m_ObjectHideFlags: 0
@@ -1491,9 +1601,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f6092a5b08d480e4fb059a38ec15259f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  snapDistance: 1
-  snapAngle: 15
-  showSnapDebug: 1
 --- !u!114 &2143810593
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1506,41 +1613,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b343e41bcb82d4a458d1358e3d299e7f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  puzzleID: Puzzle_A
-  puzzleSize: {x: 5, y: 4}
-  canDrag: 1
-  networkManagers: []
-  autoFindNetworks: 1
-  useCustomCollider: 1
-  customColliderSize: {x: 5, y: 4}
-  colliderOffset: {x: 0, y: 0}
-  isColliderTrigger: 1
-  showBorder: 1
-  borderColor: {r: 1, g: 0.96756876, b: 0, a: 1}
-  borderWidth: 0.1
-  animatedBorder: 1
-  animationSpeed: 1
-  borderMaterial: {fileID: 0}
-  connectionPoints:
-  - direction: 0
-    localPosition: {x: 0, y: 1.9}
-    connectionType: 0
-    isConnected: 0
-  - direction: 1
-    localPosition: {x: 0, y: -2}
-    connectionType: 0
-    isConnected: 0
-  - direction: 2
-    localPosition: {x: -2.5, y: 0}
-    connectionType: 0
-    isConnected: 0
-  - direction: 3
-    localPosition: {x: 2.5, y: 0}
-    connectionType: 0
-    isConnected: 0
-  showPlayerFollow: 0
-  showGizmos: 1
-  showNetworkSync: 0
 --- !u!4 &2143810594
 Transform:
   m_ObjectHideFlags: 0
@@ -1567,3 +1639,5 @@ SceneRoots:
   - {fileID: 549897660}
   - {fileID: 2143810594}
   - {fileID: 1517461813}
+  - {fileID: 901424265}
+  - {fileID: 1002715855}
