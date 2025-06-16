@@ -304,9 +304,12 @@ MonoBehaviour:
   - targetNode: {fileID: 1207706179}
     direction: 0
     lineMaterial: {fileID: 0}
+    dashedLineMaterial: {fileID: 0}
     lineWidth: 0.1
     lineColor: {r: 0, g: 1, b: 0, a: 1}
+    dashedLineColor: {r: 0.5, g: 0.5, b: 0.5, a: 1}
     sortingOrder: 100
+    isActive: 1
     lineRenderer: {fileID: 0}
   parentPiece: {fileID: 823548925}
 --- !u!1 &385987330
@@ -343,9 +346,12 @@ MonoBehaviour:
   - targetNode: {fileID: 1479412490}
     direction: 0
     lineMaterial: {fileID: 0}
+    dashedLineMaterial: {fileID: 0}
     lineWidth: 0.1
     lineColor: {r: 0, g: 1, b: 0, a: 1}
+    dashedLineColor: {r: 0.5, g: 0.5, b: 0.5, a: 1}
     sortingOrder: 100
+    isActive: 1
     lineRenderer: {fileID: 0}
   parentPiece: {fileID: 1112717539}
 --- !u!4 &385987332
@@ -507,7 +513,7 @@ MonoBehaviour:
   initialGroupID: 1
   originalGroupID: 0
   physicalConnectionTolerance: 0.1
-  snapTolerance: 0.3
+  snapTolerance: 1
   isSnapSuccessful: 0
 --- !u!61 &823548926
 BoxCollider2D:
@@ -680,9 +686,12 @@ MonoBehaviour:
   - targetNode: {fileID: 1537765563}
     direction: 1
     lineMaterial: {fileID: 0}
+    dashedLineMaterial: {fileID: 0}
     lineWidth: 0.1
     lineColor: {r: 0, g: 1, b: 0, a: 1}
+    dashedLineColor: {r: 0.5, g: 0.5, b: 0.5, a: 1}
     sortingOrder: 100
+    isActive: 1
     lineRenderer: {fileID: 0}
   parentPiece: {fileID: 1415234580}
 --- !u!61 &1036047666
@@ -831,16 +840,22 @@ MonoBehaviour:
   - targetNode: {fileID: 1479412490}
     direction: 1
     lineMaterial: {fileID: 0}
+    dashedLineMaterial: {fileID: 0}
     lineWidth: 0.1
     lineColor: {r: 0, g: 1, b: 0, a: 1}
+    dashedLineColor: {r: 0.5, g: 0.5, b: 0.5, a: 1}
     sortingOrder: 100
+    isActive: 1
     lineRenderer: {fileID: 0}
   - targetNode: {fileID: 1119594569}
     direction: 0
     lineMaterial: {fileID: 0}
+    dashedLineMaterial: {fileID: 0}
     lineWidth: 0.1
     lineColor: {r: 0, g: 1, b: 0, a: 1}
+    dashedLineColor: {r: 0.5, g: 0.5, b: 0.5, a: 1}
     sortingOrder: 100
+    isActive: 1
     lineRenderer: {fileID: 0}
   parentPiece: {fileID: 1112717539}
 --- !u!4 &1086559826
@@ -891,9 +906,12 @@ MonoBehaviour:
   - targetNode: {fileID: 1537765563}
     direction: 0
     lineMaterial: {fileID: 0}
+    dashedLineMaterial: {fileID: 0}
     lineWidth: 0.1
     lineColor: {r: 0, g: 1, b: 0, a: 1}
+    dashedLineColor: {r: 0.5, g: 0.5, b: 0.5, a: 1}
     sortingOrder: 100
+    isActive: 1
     lineRenderer: {fileID: 0}
   parentPiece: {fileID: 1415234580}
 --- !u!4 &1107059624
@@ -949,7 +967,7 @@ MonoBehaviour:
   initialGroupID: 0
   originalGroupID: 0
   physicalConnectionTolerance: 0.1
-  snapTolerance: 0.3
+  snapTolerance: 1
   isSnapSuccessful: 0
 --- !u!61 &1112717540
 BoxCollider2D:
@@ -1105,9 +1123,12 @@ MonoBehaviour:
   - targetNode: {fileID: 1086559825}
     direction: 0
     lineMaterial: {fileID: 0}
+    dashedLineMaterial: {fileID: 0}
     lineWidth: 0.1
     lineColor: {r: 0, g: 1, b: 0, a: 1}
+    dashedLineColor: {r: 0.5, g: 0.5, b: 0.5, a: 1}
     sortingOrder: 100
+    isActive: 1
     lineRenderer: {fileID: 0}
   parentPiece: {fileID: 1112717539}
 --- !u!4 &1119594570
@@ -1158,16 +1179,22 @@ MonoBehaviour:
   - targetNode: {fileID: 1819888861}
     direction: 1
     lineMaterial: {fileID: 0}
+    dashedLineMaterial: {fileID: 0}
     lineWidth: 0.1
     lineColor: {r: 0, g: 1, b: 0, a: 1}
+    dashedLineColor: {r: 0.5, g: 0.5, b: 0.5, a: 1}
     sortingOrder: 100
+    isActive: 1
     lineRenderer: {fileID: 0}
   - targetNode: {fileID: 214918471}
     direction: 0
     lineMaterial: {fileID: 0}
+    dashedLineMaterial: {fileID: 0}
     lineWidth: 0.1
     lineColor: {r: 0, g: 1, b: 0, a: 1}
+    dashedLineColor: {r: 0.5, g: 0.5, b: 0.5, a: 1}
     sortingOrder: 100
+    isActive: 1
     lineRenderer: {fileID: 0}
   parentPiece: {fileID: 823548925}
 --- !u!4 &1207706180
@@ -1218,9 +1245,12 @@ MonoBehaviour:
   - targetNode: {fileID: 1819888861}
     direction: 0
     lineMaterial: {fileID: 0}
+    dashedLineMaterial: {fileID: 0}
     lineWidth: 0.1
     lineColor: {r: 0, g: 1, b: 0, a: 1}
+    dashedLineColor: {r: 0.5, g: 0.5, b: 0.5, a: 1}
     sortingOrder: 100
+    isActive: 1
     lineRenderer: {fileID: 0}
   parentPiece: {fileID: 823548925}
 --- !u!4 &1365921787
@@ -1276,7 +1306,7 @@ MonoBehaviour:
   initialGroupID: 2
   originalGroupID: 0
   physicalConnectionTolerance: 0.1
-  snapTolerance: 0.3
+  snapTolerance: 1
   isSnapSuccessful: 0
 --- !u!61 &1415234581
 BoxCollider2D:
@@ -1430,16 +1460,22 @@ MonoBehaviour:
   - targetNode: {fileID: 385987331}
     direction: 0
     lineMaterial: {fileID: 0}
+    dashedLineMaterial: {fileID: 0}
     lineWidth: 0.1
     lineColor: {r: 0, g: 1, b: 0, a: 1}
+    dashedLineColor: {r: 0.5, g: 0.5, b: 0.5, a: 1}
     sortingOrder: 100
+    isActive: 1
     lineRenderer: {fileID: 0}
   - targetNode: {fileID: 1086559825}
     direction: 1
     lineMaterial: {fileID: 0}
+    dashedLineMaterial: {fileID: 0}
     lineWidth: 0.1
     lineColor: {r: 0, g: 1, b: 0, a: 1}
+    dashedLineColor: {r: 0.5, g: 0.5, b: 0.5, a: 1}
     sortingOrder: 100
+    isActive: 1
     lineRenderer: {fileID: 0}
   parentPiece: {fileID: 1112717539}
 --- !u!4 &1479412491
@@ -1490,16 +1526,22 @@ MonoBehaviour:
   - targetNode: {fileID: 1107059623}
     direction: 0
     lineMaterial: {fileID: 0}
+    dashedLineMaterial: {fileID: 0}
     lineWidth: 0.1
     lineColor: {r: 0, g: 1, b: 0, a: 1}
+    dashedLineColor: {r: 0.5, g: 0.5, b: 0.5, a: 1}
     sortingOrder: 100
+    isActive: 1
     lineRenderer: {fileID: 0}
   - targetNode: {fileID: 1036047664}
     direction: 1
     lineMaterial: {fileID: 0}
+    dashedLineMaterial: {fileID: 0}
     lineWidth: 0.1
     lineColor: {r: 0, g: 1, b: 0, a: 1}
+    dashedLineColor: {r: 0.5, g: 0.5, b: 0.5, a: 1}
     sortingOrder: 100
+    isActive: 1
     lineRenderer: {fileID: 0}
   parentPiece: {fileID: 1415234580}
 --- !u!4 &1537765564
@@ -1550,16 +1592,22 @@ MonoBehaviour:
   - targetNode: {fileID: 1365921786}
     direction: 0
     lineMaterial: {fileID: 0}
+    dashedLineMaterial: {fileID: 0}
     lineWidth: 0.1
     lineColor: {r: 0, g: 1, b: 0, a: 1}
+    dashedLineColor: {r: 0.5, g: 0.5, b: 0.5, a: 1}
     sortingOrder: 100
+    isActive: 1
     lineRenderer: {fileID: 0}
   - targetNode: {fileID: 1207706179}
     direction: 1
     lineMaterial: {fileID: 0}
+    dashedLineMaterial: {fileID: 0}
     lineWidth: 0.1
     lineColor: {r: 0, g: 1, b: 0, a: 1}
+    dashedLineColor: {r: 0.5, g: 0.5, b: 0.5, a: 1}
     sortingOrder: 100
+    isActive: 1
     lineRenderer: {fileID: 0}
   parentPiece: {fileID: 823548925}
 --- !u!4 &1819888862

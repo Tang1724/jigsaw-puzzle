@@ -134,7 +134,7 @@ public class PathMover : MonoBehaviour
         {
             if (!IsPathInCurrentGroup(seg.a, seg.b)) continue;
 
-            if (IsPointOnSegment(point, seg.a, seg.b, 0.1f))
+            if (IsPointOnSegment(point, seg.a, seg.b, 0.05f))
             {
                 a = seg.a;
                 b = seg.b;

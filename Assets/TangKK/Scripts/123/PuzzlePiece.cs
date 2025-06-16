@@ -44,7 +44,7 @@ public class PuzzlePiece : MonoBehaviour
         {
             // ✅ 记录原来组中的所有拼图块，用于后续恢复
             var originalGroupPieces = new System.Collections.Generic.List<PuzzlePiece>(currentGroup.pieces);
-            
+
             currentGroup.RemovePiece(this);
             currentGroup = null;
 
@@ -66,7 +66,7 @@ public class PuzzlePiece : MonoBehaviour
                     // 如果剩余拼图还在同一个组中，说明它们仍然连接
                     var firstPieceGroup = remainingPieces[0].currentGroup;
                     bool allInSameGroup = true;
-                    
+
                     foreach (var piece in remainingPieces)
                     {
                         if (piece.currentGroup != firstPieceGroup)
@@ -80,14 +80,14 @@ public class PuzzlePiece : MonoBehaviour
                     if (!allInSameGroup)
                     {
                         var processedGroups = new System.Collections.Generic.HashSet<PuzzleGroup>();
-                        
+
                         foreach (var piece in remainingPieces)
                         {
                             var group = piece.currentGroup;
                             if (group != null && !processedGroups.Contains(group))
                             {
                                 processedGroups.Add(group);
-                                
+
                                 // 如果组中只有一个拼图，恢复原组号
                                 if (group.pieces.Count == 1)
                                 {
@@ -129,7 +129,7 @@ public class PuzzlePiece : MonoBehaviour
                               Mathf.Abs(offset.x) < physicalConnectionTolerance;
 
         bool isConnected = horizontalConnect || verticalConnect;
-        
+
         if (isConnected)
         {
             Debug.Log($"[物理连接检测] {a.name} 与 {b.name} 仍然连接");
@@ -169,9 +169,9 @@ public class PuzzlePiece : MonoBehaviour
                 // ✅ 吸附成功，isSnapSuccessful已经在TrySnapTo中设置为true
                 foundSnap = true;
                 Debug.Log($"[吸附成功] {name} 成功吸附到 {other.name}");
-                
+
                 CombineWith(other);
-                
+
                 // ✅ 吸附成功后强制更新组号和路径
                 ForceUpdateAfterSnap();
                 return;
@@ -220,7 +220,7 @@ public class PuzzlePiece : MonoBehaviour
                     Debug.Log($"[吸附后更新] 强制更新PathMover组号为：{this.initialGroupID}");
                 }
             }
-            
+
             // 刷新路径
             pathMover.RefreshPaths();
         }
@@ -247,7 +247,7 @@ public class PuzzlePiece : MonoBehaviour
         float xDiff = Mathf.Abs(Mathf.Abs(offset.x) - expectedX);
         float yDiff = Mathf.Abs(offset.y);
         bool horizontalCheck = xDiff < snapTolerance && yDiff < snapTolerance;
-        
+
         Debug.Log($"[TrySnapTo] 水平检查: X差值={xDiff}, Y差值={yDiff}, 水平条件={horizontalCheck}");
 
         if (horizontalCheck)
@@ -263,9 +263,9 @@ public class PuzzlePiece : MonoBehaviour
             float yDiff2 = Mathf.Abs(Mathf.Abs(offset.y) - expectedY);
             float xDiff2 = Mathf.Abs(offset.x);
             bool verticalCheck = yDiff2 < snapTolerance && xDiff2 < snapTolerance;
-            
+
             Debug.Log($"[TrySnapTo] 垂直检查: Y差值={yDiff2}, X差值={xDiff2}, 垂直条件={verticalCheck}");
-            
+
             if (verticalCheck)
             {
                 float newY = otherPos.y + Mathf.Sign(offset.y) * expectedY;
@@ -418,5 +418,10 @@ public class PuzzlePiece : MonoBehaviour
     {
         isFrozen = frozen;
         Debug.Log($"[拼图] {(frozen ? "冻结" : "解冻")}：{gameObject.name}");
+    }
+    public void RotateSelf(float angleDegrees = 90f)
+    {
+        transform.Rotate(0, 0, angleDegrees);
+        Debug.Log($"[PuzzlePiece] {name} 自身旋转 {angleDegrees} 度");
     }
 }

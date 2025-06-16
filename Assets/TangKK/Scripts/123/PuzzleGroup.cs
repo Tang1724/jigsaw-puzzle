@@ -74,4 +74,23 @@ public class PuzzleGroup : MonoBehaviour
 
         Destroy(other.gameObject);
     }
+    public void RotateGroup(float angleDegrees = 90f)
+    {
+        Vector3 center = Vector3.zero;
+        foreach (var piece in pieces)
+        {
+            center += piece.transform.position;
+        }
+        center /= pieces.Count;
+
+        foreach (var piece in pieces)
+        {
+            Vector3 dir = piece.transform.position - center;
+            dir = Quaternion.Euler(0, 0, angleDegrees) * dir;
+            piece.transform.position = center + dir;
+            piece.transform.Rotate(0, 0, angleDegrees);
+        }
+
+        Debug.Log($"[PuzzleGroup] 组 {groupID} 旋转 {angleDegrees} 度");
+    }
 }

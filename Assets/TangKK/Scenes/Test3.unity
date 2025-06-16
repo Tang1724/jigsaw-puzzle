@@ -153,9 +153,12 @@ MonoBehaviour:
   - targetNode: {fileID: 967209720}
     direction: 0
     lineMaterial: {fileID: 0}
+    dashedLineMaterial: {fileID: 0}
     lineWidth: 0.1
     lineColor: {r: 0, g: 1, b: 0, a: 1}
+    dashedLineColor: {r: 0.5, g: 0.5, b: 0.5, a: 1}
     sortingOrder: 100
+    isActive: 1
     lineRenderer: {fileID: 0}
   parentPiece: {fileID: 150361443}
 --- !u!114 &54618810
@@ -342,6 +345,11 @@ Transform:
   - {fileID: 1295306134}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!4 &323274434 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 6867575094057674634, guid: 08ef36a67728ab64fa2bb9c3d6e9c8a9, type: 3}
+  m_PrefabInstance: {fileID: 4711839136983916349}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1 &371601416
 GameObject:
   m_ObjectHideFlags: 0
@@ -512,9 +520,12 @@ MonoBehaviour:
   - targetNode: {fileID: 1253920313}
     direction: 1
     lineMaterial: {fileID: 0}
+    dashedLineMaterial: {fileID: 0}
     lineWidth: 0.1
     lineColor: {r: 0, g: 1, b: 0, a: 1}
+    dashedLineColor: {r: 0.5, g: 0.5, b: 0.5, a: 1}
     sortingOrder: 100
+    isActive: 1
     lineRenderer: {fileID: 0}
   parentPiece: {fileID: 1977964687}
 --- !u!4 &477950093
@@ -602,9 +613,12 @@ MonoBehaviour:
   - targetNode: {fileID: 1821273376}
     direction: 1
     lineMaterial: {fileID: 0}
+    dashedLineMaterial: {fileID: 0}
     lineWidth: 0.1
     lineColor: {r: 0, g: 1, b: 0, a: 1}
+    dashedLineColor: {r: 0.5, g: 0.5, b: 0.5, a: 1}
     sortingOrder: 100
+    isActive: 1
     lineRenderer: {fileID: 0}
   parentPiece: {fileID: 1185588818}
 --- !u!4 &754786103
@@ -667,9 +681,12 @@ MonoBehaviour:
   - targetNode: {fileID: 1253920313}
     direction: 0
     lineMaterial: {fileID: 0}
+    dashedLineMaterial: {fileID: 0}
     lineWidth: 0.1
     lineColor: {r: 0, g: 1, b: 0, a: 1}
+    dashedLineColor: {r: 0.5, g: 0.5, b: 0.5, a: 1}
     sortingOrder: 100
+    isActive: 1
     lineRenderer: {fileID: 0}
   parentPiece: {fileID: 1977964687}
 --- !u!4 &826152782
@@ -687,6 +704,25 @@ Transform:
   m_Children: []
   m_Father: {fileID: 1523462023}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &886357614 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 891870878575686457, guid: 08ef36a67728ab64fa2bb9c3d6e9c8a9, type: 3}
+  m_PrefabInstance: {fileID: 4711839136983916349}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &886357616
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 886357614}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ee3a70faf85134b47ae5bb19c75057dc, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  rotationAngle: 90
+  triggerOnce: 0
 --- !u!1 &920423493
 GameObject:
   m_ObjectHideFlags: 0
@@ -736,9 +772,12 @@ MonoBehaviour:
   - targetNode: {fileID: 1821273376}
     direction: 1
     lineMaterial: {fileID: 0}
+    dashedLineMaterial: {fileID: 0}
     lineWidth: 0.1
     lineColor: {r: 0, g: 1, b: 0, a: 1}
+    dashedLineColor: {r: 0.5, g: 0.5, b: 0.5, a: 1}
     sortingOrder: 100
+    isActive: 1
     lineRenderer: {fileID: 0}
   parentPiece: {fileID: 1185588818}
 --- !u!114 &920423496
@@ -788,23 +827,32 @@ MonoBehaviour:
   - targetNode: {fileID: 54618809}
     direction: 0
     lineMaterial: {fileID: 0}
+    dashedLineMaterial: {fileID: 0}
     lineWidth: 0.1
     lineColor: {r: 0, g: 1, b: 0, a: 1}
+    dashedLineColor: {r: 0.5, g: 0.5, b: 0.5, a: 1}
     sortingOrder: 100
+    isActive: 1
     lineRenderer: {fileID: 0}
   - targetNode: {fileID: 1739075462}
     direction: 1
     lineMaterial: {fileID: 0}
+    dashedLineMaterial: {fileID: 0}
     lineWidth: 0.1
     lineColor: {r: 0, g: 1, b: 0, a: 1}
+    dashedLineColor: {r: 0.5, g: 0.5, b: 0.5, a: 1}
     sortingOrder: 100
+    isActive: 1
     lineRenderer: {fileID: 0}
   - targetNode: {fileID: 1083608603}
     direction: 1
     lineMaterial: {fileID: 0}
+    dashedLineMaterial: {fileID: 0}
     lineWidth: 0.1
     lineColor: {r: 0, g: 1, b: 0, a: 1}
+    dashedLineColor: {r: 0.5, g: 0.5, b: 0.5, a: 1}
     sortingOrder: 100
+    isActive: 1
     lineRenderer: {fileID: 0}
   parentPiece: {fileID: 150361443}
 --- !u!4 &967209722
@@ -918,9 +966,12 @@ MonoBehaviour:
   - targetNode: {fileID: 1821273376}
     direction: 0
     lineMaterial: {fileID: 0}
+    dashedLineMaterial: {fileID: 0}
     lineWidth: 0.1
     lineColor: {r: 0, g: 1, b: 0, a: 1}
+    dashedLineColor: {r: 0.5, g: 0.5, b: 0.5, a: 1}
     sortingOrder: 100
+    isActive: 1
     lineRenderer: {fileID: 0}
   parentPiece: {fileID: 1185588818}
 --- !u!4 &1046638644
@@ -984,9 +1035,12 @@ MonoBehaviour:
   - targetNode: {fileID: 1821273376}
     direction: 0
     lineMaterial: {fileID: 0}
+    dashedLineMaterial: {fileID: 0}
     lineWidth: 0.1
     lineColor: {r: 0, g: 1, b: 0, a: 1}
+    dashedLineColor: {r: 0.5, g: 0.5, b: 0.5, a: 1}
     sortingOrder: 100
+    isActive: 1
     lineRenderer: {fileID: 0}
   parentPiece: {fileID: 1185588818}
 --- !u!4 &1081118231
@@ -1077,16 +1131,22 @@ MonoBehaviour:
   - targetNode: {fileID: 967209720}
     direction: 1
     lineMaterial: {fileID: 0}
+    dashedLineMaterial: {fileID: 0}
     lineWidth: 0.1
     lineColor: {r: 0, g: 1, b: 0, a: 1}
+    dashedLineColor: {r: 0.5, g: 0.5, b: 0.5, a: 1}
     sortingOrder: 100
+    isActive: 1
     lineRenderer: {fileID: 0}
   - targetNode: {fileID: 1194746326}
     direction: 0
     lineMaterial: {fileID: 0}
+    dashedLineMaterial: {fileID: 0}
     lineWidth: 0.1
     lineColor: {r: 0, g: 1, b: 0, a: 1}
+    dashedLineColor: {r: 0.5, g: 0.5, b: 0.5, a: 1}
     sortingOrder: 100
+    isActive: 1
     lineRenderer: {fileID: 0}
   parentPiece: {fileID: 150361443}
 --- !u!1 &1185588817
@@ -1280,9 +1340,12 @@ MonoBehaviour:
   - targetNode: {fileID: 1083608603}
     direction: 0
     lineMaterial: {fileID: 0}
+    dashedLineMaterial: {fileID: 0}
     lineWidth: 0.1
     lineColor: {r: 0, g: 1, b: 0, a: 1}
+    dashedLineColor: {r: 0.5, g: 0.5, b: 0.5, a: 1}
     sortingOrder: 100
+    isActive: 1
     lineRenderer: {fileID: 0}
   parentPiece: {fileID: 150361443}
 --- !u!114 &1194746327
@@ -1345,9 +1408,12 @@ MonoBehaviour:
   - targetNode: {fileID: 1253920313}
     direction: 1
     lineMaterial: {fileID: 0}
+    dashedLineMaterial: {fileID: 0}
     lineWidth: 0.1
     lineColor: {r: 0, g: 1, b: 0, a: 1}
+    dashedLineColor: {r: 0.5, g: 0.5, b: 0.5, a: 1}
     sortingOrder: 100
+    isActive: 1
     lineRenderer: {fileID: 0}
   parentPiece: {fileID: 1977964687}
 --- !u!4 &1211387782
@@ -1398,30 +1464,42 @@ MonoBehaviour:
   - targetNode: {fileID: 826152781}
     direction: 0
     lineMaterial: {fileID: 0}
+    dashedLineMaterial: {fileID: 0}
     lineWidth: 0.1
     lineColor: {r: 0, g: 1, b: 0, a: 1}
+    dashedLineColor: {r: 0.5, g: 0.5, b: 0.5, a: 1}
     sortingOrder: 100
+    isActive: 1
     lineRenderer: {fileID: 0}
   - targetNode: {fileID: 1512891978}
     direction: 0
     lineMaterial: {fileID: 0}
+    dashedLineMaterial: {fileID: 0}
     lineWidth: 0.1
     lineColor: {r: 0, g: 1, b: 0, a: 1}
+    dashedLineColor: {r: 0.5, g: 0.5, b: 0.5, a: 1}
     sortingOrder: 100
+    isActive: 1
     lineRenderer: {fileID: 0}
   - targetNode: {fileID: 1211387781}
     direction: 1
     lineMaterial: {fileID: 0}
+    dashedLineMaterial: {fileID: 0}
     lineWidth: 0.1
     lineColor: {r: 0, g: 1, b: 0, a: 1}
+    dashedLineColor: {r: 0.5, g: 0.5, b: 0.5, a: 1}
     sortingOrder: 100
+    isActive: 1
     lineRenderer: {fileID: 0}
   - targetNode: {fileID: 477950092}
     direction: 1
     lineMaterial: {fileID: 0}
+    dashedLineMaterial: {fileID: 0}
     lineWidth: 0.1
     lineColor: {r: 0, g: 1, b: 0, a: 1}
+    dashedLineColor: {r: 0.5, g: 0.5, b: 0.5, a: 1}
     sortingOrder: 100
+    isActive: 1
     lineRenderer: {fileID: 0}
   parentPiece: {fileID: 1977964687}
 --- !u!4 &1253920314
@@ -1537,9 +1615,12 @@ MonoBehaviour:
   - targetNode: {fileID: 1739075462}
     direction: 0
     lineMaterial: {fileID: 0}
+    dashedLineMaterial: {fileID: 0}
     lineWidth: 0.1
     lineColor: {r: 0, g: 1, b: 0, a: 1}
+    dashedLineColor: {r: 0.5, g: 0.5, b: 0.5, a: 1}
     sortingOrder: 100
+    isActive: 1
     lineRenderer: {fileID: 0}
   parentPiece: {fileID: 150361443}
 --- !u!1 &1512891977
@@ -1575,9 +1656,12 @@ MonoBehaviour:
   - targetNode: {fileID: 1253920313}
     direction: 0
     lineMaterial: {fileID: 0}
+    dashedLineMaterial: {fileID: 0}
     lineWidth: 0.1
     lineColor: {r: 0, g: 1, b: 0, a: 1}
+    dashedLineColor: {r: 0.5, g: 0.5, b: 0.5, a: 1}
     sortingOrder: 100
+    isActive: 1
     lineRenderer: {fileID: 0}
   parentPiece: {fileID: 1977964687}
 --- !u!4 &1512891979
@@ -1664,16 +1748,22 @@ MonoBehaviour:
   - targetNode: {fileID: 967209720}
     direction: 1
     lineMaterial: {fileID: 0}
+    dashedLineMaterial: {fileID: 0}
     lineWidth: 0.1
     lineColor: {r: 0, g: 1, b: 0, a: 1}
+    dashedLineColor: {r: 0.5, g: 0.5, b: 0.5, a: 1}
     sortingOrder: 100
+    isActive: 1
     lineRenderer: {fileID: 0}
   - targetNode: {fileID: 1438837609}
     direction: 0
     lineMaterial: {fileID: 0}
+    dashedLineMaterial: {fileID: 0}
     lineWidth: 0.1
     lineColor: {r: 0, g: 1, b: 0, a: 1}
+    dashedLineColor: {r: 0.5, g: 0.5, b: 0.5, a: 1}
     sortingOrder: 100
+    isActive: 1
     lineRenderer: {fileID: 0}
   parentPiece: {fileID: 150361443}
 --- !u!4 &1739075464
@@ -1691,6 +1781,17 @@ Transform:
   m_Children: []
   m_Father: {fileID: 1295306134}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1759298307 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 6081448363282985643, guid: 08ef36a67728ab64fa2bb9c3d6e9c8a9, type: 3}
+  m_PrefabInstance: {fileID: 4711839136983916349}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6a3c3b0295f8d4942960d7d9aea864d6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &1821273375
 GameObject:
   m_ObjectHideFlags: 0
@@ -1725,30 +1826,42 @@ MonoBehaviour:
   - targetNode: {fileID: 1046638643}
     direction: 0
     lineMaterial: {fileID: 0}
+    dashedLineMaterial: {fileID: 0}
     lineWidth: 0.1
     lineColor: {r: 0, g: 1, b: 0, a: 1}
+    dashedLineColor: {r: 0.5, g: 0.5, b: 0.5, a: 1}
     sortingOrder: 100
+    isActive: 1
     lineRenderer: {fileID: 0}
   - targetNode: {fileID: 1081118230}
     direction: 0
     lineMaterial: {fileID: 0}
+    dashedLineMaterial: {fileID: 0}
     lineWidth: 0.1
     lineColor: {r: 0, g: 1, b: 0, a: 1}
+    dashedLineColor: {r: 0.5, g: 0.5, b: 0.5, a: 1}
     sortingOrder: 100
+    isActive: 1
     lineRenderer: {fileID: 0}
   - targetNode: {fileID: 754786102}
     direction: 1
     lineMaterial: {fileID: 0}
+    dashedLineMaterial: {fileID: 0}
     lineWidth: 0.1
     lineColor: {r: 0, g: 1, b: 0, a: 1}
+    dashedLineColor: {r: 0.5, g: 0.5, b: 0.5, a: 1}
     sortingOrder: 100
+    isActive: 1
     lineRenderer: {fileID: 0}
   - targetNode: {fileID: 920423495}
     direction: 1
     lineMaterial: {fileID: 0}
+    dashedLineMaterial: {fileID: 0}
     lineWidth: 0.1
     lineColor: {r: 0, g: 1, b: 0, a: 1}
+    dashedLineColor: {r: 0.5, g: 0.5, b: 0.5, a: 1}
     sortingOrder: 100
+    isActive: 1
     lineRenderer: {fileID: 0}
   parentPiece: {fileID: 1185588818}
 --- !u!4 &1821273377
@@ -1933,7 +2046,6 @@ Transform:
   m_ConstrainProportionsScale: 1
   m_Children:
   - {fileID: 1523462023}
-  - {fileID: 2037993990}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &2037993987
@@ -1968,7 +2080,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e6e81e0ccddd6a840a360c15676fe183, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  startNode: {fileID: 826152781}
+  startNode: {fileID: 1759298307}
   moveSpeed: 5
 --- !u!212 &2037993989
 SpriteRenderer:
@@ -2034,11 +2146,11 @@ Transform:
   m_GameObject: {fileID: 2037993987}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: -0.21, y: 0.88, z: 0}
+  m_LocalPosition: {x: -1.3619999, y: 1.0800002, z: 0}
   m_LocalScale: {x: 0.07, y: 0.07, z: 0.07}
   m_ConstrainProportionsScale: 1
   m_Children: []
-  m_Father: {fileID: 1977964690}
+  m_Father: {fileID: 323274434}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!61 &2037993991
 BoxCollider2D:
@@ -2248,8 +2360,14 @@ PrefabInstance:
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
-    m_AddedGameObjects: []
-    m_AddedComponents: []
+    m_AddedGameObjects:
+    - targetCorrespondingSourceObject: {fileID: 6867575094057674634, guid: 08ef36a67728ab64fa2bb9c3d6e9c8a9, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 2037993990}
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 891870878575686457, guid: 08ef36a67728ab64fa2bb9c3d6e9c8a9, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 886357616}
   m_SourcePrefab: {fileID: 100100000, guid: 08ef36a67728ab64fa2bb9c3d6e9c8a9, type: 3}
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
