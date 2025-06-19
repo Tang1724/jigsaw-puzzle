@@ -48,13 +48,16 @@ public class PathMover : MonoBehaviour
 
         if (input.sqrMagnitude > 0.01f)
         {
-            Vector3 moveDir = input.normalized;
-            Vector3 move = moveDir * moveSpeed * Time.deltaTime;
-            Vector3 newPos = transform.position + move;
+            // ✅ 使用 X/Y 平面移动（适用于 2D 横版或俯视图）
+            Vector3 moveDir = new Vector3(input.x, input.y, 0).normalized;
+            Vector3 tryMove = moveDir * moveSpeed * Time.deltaTime;
+            Vector3 candidatePos = transform.position + tryMove;
 
-            if (IsOnAnyPath(newPos, out Vector3 segA, out Vector3 segB))
+            if (FindClosestPathSegment(candidatePos, out Vector3 segA, out Vector3 segB))
             {
-                transform.position = newPos;
+                // 吸附到路径上
+                Vector3 projected = GetClosestPointOnSegment(candidatePos, segA, segB);
+                transform.position = projected;
 
                 Transform correctParent = GetPuzzlePieceParentFromSegment(segA, segB, out int groupID);
                 if (correctParent != null && transform.parent != correctParent)
@@ -106,18 +109,14 @@ public class PathMover : MonoBehaviour
             foreach (var path in node.connectedPaths)
             {
                 if (path == null || path.targetNode == null) continue;
-
-                // ✅ 跳过虚线路径
                 if (!path.isActive) continue;
-
                 if (path.targetNode.parentPiece != null && path.targetNode.parentPiece.isFrozen)
                     continue;
 
                 Vector3 a = node.transform.position;
                 Vector3 b = path.targetNode.transform.position;
 
-                if (!allPathSegments.Exists(p =>
-                    (p.a == a && p.b == b) || (p.a == b && p.b == a)))
+                if (!allPathSegments.Exists(p => (p.a == a && p.b == b) || (p.a == b && p.b == a)))
                 {
                     allPathSegments.Add((a, b));
                     Debug.Log($"[路径缓存] 添加路径段：{a} ↔ {b}");
@@ -128,37 +127,35 @@ public class PathMover : MonoBehaviour
         Debug.Log($"[路径缓存] 总路径段数：{allPathSegments.Count}");
     }
 
-    bool IsOnAnyPath(Vector3 point, out Vector3 a, out Vector3 b)
+    bool FindClosestPathSegment(Vector3 point, out Vector3 closestA, out Vector3 closestB)
     {
+        float minDist = float.MaxValue;
+        closestA = closestB = Vector3.zero;
+
         foreach (var seg in allPathSegments)
         {
             if (!IsPathInCurrentGroup(seg.a, seg.b)) continue;
 
-            if (IsPointOnSegment(point, seg.a, seg.b, 0.05f))
+            Vector3 projected = GetClosestPointOnSegment(point, seg.a, seg.b);
+            float dist = Vector3.Distance(point, projected);
+
+            if (dist < 0.3f && dist < minDist)
             {
-                a = seg.a;
-                b = seg.b;
-                return true;
+                minDist = dist;
+                closestA = seg.a;
+                closestB = seg.b;
             }
         }
 
-        a = b = Vector3.zero;
-        return false;
+        return minDist < float.MaxValue;
     }
 
-    bool IsPointOnSegment(Vector3 point, Vector3 a, Vector3 b, float tolerance = 0.1f)
+    Vector3 GetClosestPointOnSegment(Vector3 p, Vector3 a, Vector3 b)
     {
         Vector3 ab = b - a;
-        Vector3 ap = point - a;
-
-        float abLen = ab.magnitude;
-        float proj = Vector3.Dot(ap, ab.normalized);
-
-        if (proj < 0 || proj > abLen)
-            return false;
-
-        float distance = Vector3.Magnitude(ap - ab.normalized * proj);
-        return distance < tolerance;
+        float t = Vector3.Dot(p - a, ab.normalized) / ab.magnitude;
+        t = Mathf.Clamp01(t);
+        return a + ab * t;
     }
 
     bool IsPathInCurrentGroup(Vector3 posA, Vector3 posB)
@@ -196,8 +193,6 @@ public class PathMover : MonoBehaviour
             foreach (var path in node.connectedPaths)
             {
                 if (path == null || path.targetNode == null) continue;
-
-                // ✅ 确保只处理激活路径
                 if (!path.isActive) continue;
 
                 Vector3 posA = node.transform.position;
