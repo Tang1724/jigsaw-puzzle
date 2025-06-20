@@ -59,7 +59,7 @@ public class PathNode : MonoBehaviour
     }
 #endif
 
-    private void AssignParentPiece()
+    public void AssignParentPiece()
     {
         parentPiece = FindClosestPuzzlePiece();
         if (parentPiece == null)

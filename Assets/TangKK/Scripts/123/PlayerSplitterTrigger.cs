@@ -1,7 +1,7 @@
 using UnityEngine;
 
 /// <summary>
-/// 玩家分流器：玩家穿过触发器后，在两个节点生成新玩家，并销毁原玩家
+/// 玩家分流器：穿过触发器后在两个节点生成新玩家，并销毁原玩家
 /// </summary>
 [RequireComponent(typeof(Collider2D))]
 public class PlayerSplitterTrigger : MonoBehaviour
@@ -15,6 +15,9 @@ public class PlayerSplitterTrigger : MonoBehaviour
 
     [Header("是否只触发一次")]
     public bool triggerOnce = true;
+
+    [Header("调试选项")]
+    public bool debugMode = true;
 
     private bool hasTriggered = false;
 
@@ -35,26 +38,53 @@ public class PlayerSplitterTrigger : MonoBehaviour
             return;
         }
 
-        // 获取旧玩家的组 ID
+        GameObject originalPlayer = other.gameObject;
         PuzzlePiece oldPiece = other.GetComponentInParent<PuzzlePiece>();
         int groupID = oldPiece != null ? oldPiece.GroupID : -1;
 
-        Debug.Log($"[PlayerSplitter] 👥 玩家分流触发，原组 ID: {groupID}");
+        SpriteRenderer originalSprite = originalPlayer.GetComponent<SpriteRenderer>();
+        PathMover originalMover = originalPlayer.GetComponent<PathMover>();
 
-        // 销毁旧玩家
-        Destroy(other.gameObject);
+        if (debugMode)
+        {
+            Debug.Log($"[PlayerSplitter] 📋 原玩家信息:");
+            Debug.Log($"  - 组ID: {groupID}");
+            Debug.Log($"  - Sprite: {(originalSprite?.sprite?.name ?? "无")}");
+            Debug.Log($"  - 位置: {originalPlayer.transform.position}");
+            Debug.Log($"  - PathMover状态: {(originalMover != null ? "存在" : "缺失")}");
+        }
 
-        // 生成两个新玩家
-        SpawnNewPlayer(spawnNodeA, groupID, "A");
-        SpawnNewPlayer(spawnNodeB, groupID, "B");
+        PlayerData originalData = new PlayerData
+        {
+            sprite = originalSprite?.sprite,
+            spriteColor = originalSprite?.color ?? Color.white,
+            sortingLayerName = originalSprite?.sortingLayerName ?? "Default",
+            sortingOrder = originalSprite?.sortingOrder ?? 0,
+            scale = originalPlayer.transform.localScale,
+            worldScale = originalPlayer.transform.lossyScale,
+            groupID = groupID
+        };
+
+        Destroy(originalPlayer);
+
+        SpawnNewPlayer(spawnNodeA, originalData, "A");
+        SpawnNewPlayer(spawnNodeB, originalData, "B");
 
         hasTriggered = true;
     }
 
-    /// <summary>
-    /// 在指定节点生成新玩家，并设置其父级为该节点所在的拼图块
-    /// </summary>
-    private void SpawnNewPlayer(PathNode node, int groupID, string label)
+    private struct PlayerData
+    {
+        public Sprite sprite;
+        public Color spriteColor;
+        public string sortingLayerName;
+        public int sortingOrder;
+        public Vector3 scale;
+        public Vector3 worldScale;
+        public int groupID;
+    }
+
+    private void SpawnNewPlayer(PathNode node, PlayerData originalData, string label)
     {
         if (node == null)
         {
@@ -62,7 +92,8 @@ public class PlayerSplitterTrigger : MonoBehaviour
             return;
         }
 
-        // 实例化玩家
+        Debug.Log($"🎯 开始生成 Player_{label} 在节点: {node.name}");
+
         GameObject newPlayer = Instantiate(playerPrefab, node.transform.position, Quaternion.identity);
         if (newPlayer == null)
         {
@@ -71,53 +102,136 @@ public class PlayerSplitterTrigger : MonoBehaviour
         }
 
         newPlayer.name = $"Player_{label}";
-
-        // ✅ 确保新玩家GameObject是激活状态
         newPlayer.SetActive(true);
-        Debug.Log($"[PlayerSplitter] 🔋 Player_{label} GameObject已激活");
 
-        // ✅ 设置为该节点所属拼图块的子对象
+        CopyRenderingFromOriginal(newPlayer, originalData, label);
+
         PuzzlePiece targetPiece = node.parentPiece;
         if (targetPiece != null)
         {
-            newPlayer.transform.SetParent(targetPiece.transform, worldPositionStays: true);
-            Debug.Log($"[PlayerSplitter] ✅ Player_{label} 已设置为拼图 {targetPiece.name} 的子对象");
+            Vector3 worldScale = originalData.worldScale;
+
+            newPlayer.transform.SetParent(targetPiece.transform, worldPositionStays: false);
+            newPlayer.transform.position = node.transform.position;
+
+            Vector3 parentScale = targetPiece.transform.lossyScale;
+            newPlayer.transform.localScale = new Vector3(
+                worldScale.x / (parentScale.x != 0 ? parentScale.x : 1),
+                worldScale.y / (parentScale.y != 0 ? parentScale.y : 1),
+                worldScale.z / (parentScale.z != 0 ? parentScale.z : 1)
+            );
+
+            Debug.Log($"[PlayerSplitter] ✅ Player_{label} 设置为 {targetPiece.name} 子对象，恢复原始缩放");
         }
         else
         {
-            Debug.LogWarning($"[PlayerSplitter] ⚠️ 无法找到节点 {node.name} 所属的拼图块，Player_{label} 保留在场景根目录");
+            Debug.LogWarning($"[PlayerSplitter] ⚠️ 无法找到节点 {node.name} 所属的拼图块");
         }
 
-        // 设置 PathMover 起点并确保组件启用
+        SetupPathMover(newPlayer, node, originalData.groupID, label);
+        SetupPuzzlePiece(newPlayer, originalData.groupID, label);
+        EnableAllComponents(newPlayer, label);
+
+        var allNodes = newPlayer.GetComponentsInChildren<PathNode>();
+        foreach (var pNode in allNodes)
+        {
+            if (pNode != null)
+            {
+                pNode.AssignParentPiece(); // 确保该方法为 public
+                pNode.RefreshPathLines();
+                Debug.Log($"[PlayerSplitter] 🔁 节点 {pNode.name} 路径线已刷新");
+            }
+        }
+
+        // ✅ 关键修复：刷新所有 PathNode 的 parentPiece，确保路径段所属拼图正确
+        RefreshAllPathNodeGroupIDs();
+
+        // ✅ 每个玩家生成后立即刷新其路径状态
         var mover = newPlayer.GetComponent<PathMover>();
-        if (mover != null)
-        {
-            mover.enabled = true; // ✅ 确保PathMover组件启用
-            mover.startNode = node;
-            mover.transform.position = node.transform.position;
-            mover.ForceUpdateGroupID(groupID);
-            Debug.Log($"[PlayerSplitter] ✅ Player_{label} PathMover已启用，起点设置完成，并分配到组 {groupID}");
-        }
-        else
-        {
-            Debug.LogWarning($"[PlayerSplitter] ⚠️ Player_{label} 缺少 PathMover 组件");
-        }
-
-        // 设置 PuzzlePiece 组信息并确保组件启用
         var piece = newPlayer.GetComponentInParent<PuzzlePiece>();
-        if (piece != null)
+        if (mover != null && piece != null)
         {
-            piece.enabled = true; // ✅ 确保PuzzlePiece组件启用
-            piece.initialGroupID = groupID;
-            piece.originalGroupID = groupID;
-            Debug.Log($"[PlayerSplitter] 🧩 Player_{label} PuzzlePiece已启用，拼图组号设置为 {groupID}");
-        }
-        else
-        {
-            Debug.LogWarning($"[PlayerSplitter] ⚠️ Player_{label} 缺少 PuzzlePiece 脚本");
+            mover.ForceUpdateGroupID(piece.GroupID);
+            mover.RefreshPaths();
+            Debug.Log($"[PlayerSplitter] 🔁 Player_{label} 路径状态刷新完成");
         }
 
-        // ✅ 确保其他可能存在的关键组件也是启用状态
+        if (debugMode)
+        {
+            var finalSprite = newPlayer.GetComponent<SpriteRenderer>();
+            Debug.Log($"🔍 Player_{label} 最终检查:");
+            Debug.Log($"  - Sprite: {(finalSprite?.sprite?.name ?? "无")}");
+            Debug.Log($"  - 位置: {newPlayer.transform.position}");
+            Debug.Log($"  - 激活状态: {newPlayer.activeInHierarchy}");
+        }
+
+        Debug.Log($"[PlayerSplitter] 🎯 Player_{label} 创建完成！");
+    }
+
+    private void CopyRenderingFromOriginal(GameObject newPlayer, PlayerData originalData, string label)
+    {
+        var newSprite = newPlayer.GetComponent<SpriteRenderer>();
+        if (newSprite == null)
+        {
+            Debug.LogError($"[PlayerSplitter] ❌ Player_{label} 缺少SpriteRenderer组件！");
+            return;
+        }
+
+        newSprite.sprite = originalData.sprite;
+        Color spriteColor = originalData.spriteColor;
+
+        if (spriteColor.a <= 0.01f)
+        {
+            spriteColor.a = 1;
+            Debug.LogWarning($"[PlayerSplitter] ⚠️ 原颜色透明，已设置为不透明");
+        }
+
+        newSprite.color = spriteColor;
+        newSprite.sortingLayerName = string.IsNullOrEmpty(originalData.sortingLayerName) ? "Default" : originalData.sortingLayerName;
+        newSprite.sortingOrder = originalData.sortingOrder;
+        newSprite.enabled = true;
+
+        newPlayer.transform.localScale = originalData.scale == Vector3.zero ? Vector3.one : originalData.scale;
+
+        Debug.Log($"[PlayerSplitter] ✅ Player_{label} 渲染设置完成，sprite: {(newSprite.sprite?.name ?? "无")}");
+    }
+
+    private void SetupPathMover(GameObject newPlayer, PathNode startNode, int groupID, string label)
+    {
+        var mover = newPlayer.GetComponent<PathMover>();
+        if (mover == null)
+        {
+            Debug.LogWarning($"[PlayerSplitter] ⚠️ Player_{label} 缺少PathMover组件");
+            return;
+        }
+
+        mover.enabled = false;
+        mover.startNode = startNode;
+        mover.transform.position = startNode.transform.position;
+        mover.ForceUpdateGroupID(groupID);
+        mover.enabled = true;
+
+        Debug.Log($"[PlayerSplitter] 🚶 Player_{label} PathMover设置完成，起点: {startNode.name}");
+    }
+
+    private void SetupPuzzlePiece(GameObject newPlayer, int groupID, string label)
+    {
+        var piece = newPlayer.GetComponentInParent<PuzzlePiece>();
+        if (piece == null)
+        {
+            Debug.LogWarning($"[PlayerSplitter] ⚠️ Player_{label} 缺少PuzzlePiece组件");
+            return;
+        }
+
+        piece.enabled = true;
+        piece.initialGroupID = groupID;
+        piece.originalGroupID = groupID;
+
+        Debug.Log($"[PlayerSplitter] 🧩 Player_{label} PuzzlePiece设置完成，组ID: {groupID}");
+    }
+
+    private void EnableAllComponents(GameObject newPlayer, string label)
+    {
         var collider = newPlayer.GetComponent<Collider2D>();
         if (collider != null)
         {
@@ -128,17 +242,22 @@ public class PlayerSplitterTrigger : MonoBehaviour
         var rigidbody = newPlayer.GetComponent<Rigidbody2D>();
         if (rigidbody != null)
         {
-            rigidbody.simulated = true; // Rigidbody2D使用simulated属性而不是enabled
+            rigidbody.simulated = true;
             Debug.Log($"[PlayerSplitter] 🏃 Player_{label} Rigidbody2D已启用");
         }
 
-        var renderer = newPlayer.GetComponent<Renderer>();
-        if (renderer != null)
-        {
-            renderer.enabled = true;
-            Debug.Log($"[PlayerSplitter] 🎨 Player_{label} Renderer已启用");
-        }
+        Debug.Log($"[PlayerSplitter] ✅ Player_{label} 所有组件已启用");
+    }
 
-        Debug.Log($"[PlayerSplitter] 🎯 Player_{label} 所有组件激活完成！");
+    /// <summary>
+    /// 强制刷新所有 PathNode 的 parentPiece 引用（用于路径段所属判断）
+    /// </summary>
+    private void RefreshAllPathNodeGroupIDs()
+    {
+        PathNode[] allNodes = FindObjectsOfType<PathNode>(true);
+        foreach (var node in allNodes)
+        {
+            node.AssignParentPiece();
+        }
     }
 }

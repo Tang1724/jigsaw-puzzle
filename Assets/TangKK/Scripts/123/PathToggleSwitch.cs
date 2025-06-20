@@ -129,13 +129,26 @@ public class PathToggleSwitch : MonoBehaviour
             SetConnection(nodeA1, nodeA2, true);
         }
 
-        var mover = FindObjectOfType<PathMover>();
-        if (mover != null)
-        {
-            mover.RefreshPaths();
-        }
+        // ✅ 修复：刷新所有PathMover实例，而不只是第一个
+        RefreshAllPathMovers();
 
         Debug.Log($"[开关] 路径切换完成，现在是 {(isToggled ? "B 路径" : "A 路径")}");
+    }
+
+    /// <summary>
+    /// ✅ 新增：刷新所有PathMover实例
+    /// </summary>
+    void RefreshAllPathMovers()
+    {
+        PathMover[] allMovers = FindObjectsOfType<PathMover>();
+        foreach (var mover in allMovers)
+        {
+            if (mover != null)
+            {
+                mover.RefreshPaths();
+                Debug.Log($"[开关] 刷新PathMover: {mover.name}");
+            }
+        }
     }
 
     void SetConnection(PathNode a, PathNode b, bool enable)
