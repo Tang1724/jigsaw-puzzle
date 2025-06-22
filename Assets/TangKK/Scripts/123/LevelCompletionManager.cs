@@ -6,29 +6,38 @@ public class LevelCompletionManager : MonoBehaviour
 {
     [Header("终点节点设置")]
     public List<PathNode> finishNodes = new List<PathNode>();
+    
+    [Header("触发范围设置")]
+    [Tooltip("所有终点的默认触发范围")]
+    public float defaultTriggerRadius = 0.3f;
 
     [Header("过关设置")]
     public string nextSceneName = "NextLevel";
     public bool useSceneIndex = false;
     public int nextSceneIndex = 1;
 
-    [Header("分组设置")]
-    public bool requireSameGroup = true; // 是否要求同一组
-
     [Header("调试信息")]
     public bool showDebugInfo = true;
 
-    private HashSet<PathNode> triggeredNodes = new HashSet<PathNode>();
+    /// <summary>
+    /// 已激活的终点节点
+    /// </summary>
+    private HashSet<PathNode> activatedNodes = new HashSet<PathNode>();
     private bool levelCompleted = false;
 
     void Start()
     {
-        // 为所有终点节点添加触发器
         SetupFinishNodes();
+        
+        if (showDebugInfo)
+        {
+            Debug.Log($"[LevelCompletion] 🎮 关卡初始化：共 {finishNodes.Count} 个终点节点");
+            Debug.Log($"[LevelCompletion] 📋 过关条件：{finishNodes.Count} 个终点都需要有Player激活");
+        }
     }
 
     /// <summary>
-    /// 设置终点节点的碰撞器
+    /// 设置终点节点
     /// </summary>
     void SetupFinishNodes()
     {
@@ -36,90 +45,101 @@ public class LevelCompletionManager : MonoBehaviour
         {
             if (node == null) continue;
 
-            // 确保节点有碰撞器
+            // 确保有碰撞器
             Collider2D collider = node.GetComponent<Collider2D>();
             if (collider == null)
             {
                 collider = node.gameObject.AddComponent<CircleCollider2D>();
-                ((CircleCollider2D)collider).radius = 0.3f;
             }
             
-            // 设置为触发器
+            // ✅ 设置为触发器并使用可调节的范围
             collider.isTrigger = true;
+            if (collider is CircleCollider2D circleCollider)
+            {
+                circleCollider.radius = defaultTriggerRadius;
+            }
 
-            // 添加终点触发组件
+            // 添加触发器组件
             FinishNodeTrigger trigger = node.GetComponent<FinishNodeTrigger>();
             if (trigger == null)
             {
                 trigger = node.gameObject.AddComponent<FinishNodeTrigger>();
             }
             
-            // 设置回调
+            // ✅ 设置触发器的范围
+            trigger.triggerRadius = defaultTriggerRadius;
             trigger.Initialize(this, node);
 
             if (showDebugInfo)
             {
-                Debug.Log($"[LevelCompletion] 设置终点节点: {node.name} (组ID: {node.GroupID})");
+                Debug.Log($"[LevelCompletion] 📍 设置终点: {node.name} (触发范围: {defaultTriggerRadius})");
             }
         }
     }
 
     /// <summary>
-    /// 当玩家进入终点节点
+    /// ✅ 兼容旧方法名 - 当玩家进入终点时调用
     /// </summary>
     public void OnPlayerEnterFinish(PathNode node)
     {
         if (levelCompleted) return;
 
-        triggeredNodes.Add(node);
-        
+        activatedNodes.Add(node);
+
         if (showDebugInfo)
         {
-            Debug.Log($"[LevelCompletion] 玩家进入终点: {node.name} 组ID: {node.GroupID} ({triggeredNodes.Count}/{finishNodes.Count})");
+            Debug.Log($"[LevelCompletion] ✅ 终点激活: {node.name} ({activatedNodes.Count}/{finishNodes.Count})");
         }
 
         CheckLevelCompletion();
     }
 
     /// <summary>
-    /// 当玩家离开终点节点
+    /// ✅ 兼容旧方法名 - 当玩家离开终点时调用
     /// </summary>
     public void OnPlayerExitFinish(PathNode node)
     {
         if (levelCompleted) return;
 
-        triggeredNodes.Remove(node);
-        
+        activatedNodes.Remove(node);
+
         if (showDebugInfo)
         {
-            Debug.Log($"[LevelCompletion] 玩家离开终点: {node.name} 组ID: {node.GroupID} ({triggeredNodes.Count}/{finishNodes.Count})");
+            Debug.Log($"[LevelCompletion] ❌ 终点失活: {node.name} ({activatedNodes.Count}/{finishNodes.Count})");
         }
-        
-        // ✅ 当玩家离开终点时，重新检查完成状态（可能从完成变为未完成）
-        CheckLevelCompletion();
     }
 
     /// <summary>
-    /// 检查是否完成关卡
+    /// ✅ 新方法名 - 当终点被激活时调用
+    /// </summary>
+    public void OnFinishNodeActivated(PathNode node)
+    {
+        OnPlayerEnterFinish(node);
+    }
+
+    /// <summary>
+    /// ✅ 新方法名 - 当终点失活时调用
+    /// </summary>
+    public void OnFinishNodeDeactivated(PathNode node)
+    {
+        OnPlayerExitFinish(node);
+    }
+
+    /// <summary>
+    /// ✅ 检查关卡完成条件 - 超级简单的逻辑
     /// </summary>
     void CheckLevelCompletion()
     {
-        if (finishNodes.Count == 0) return;
+        // ✅ 只检查：是否所有终点都被激活
+        bool allActivated = finishNodes.Count > 0 && 
+                           finishNodes.All(node => node != null && activatedNodes.Contains(node));
 
-        bool allTriggered = false;
-
-        if (requireSameGroup)
+        if (showDebugInfo)
         {
-            // 按组检查完成条件
-            allTriggered = CheckGroupCompletion();
-        }
-        else
-        {
-            // 检查是否所有终点都被触发（原逻辑）
-            allTriggered = finishNodes.All(node => node != null && triggeredNodes.Contains(node));
+            Debug.Log($"[LevelCompletion] 🔍 完成检查: {activatedNodes.Count}/{finishNodes.Count} 个终点激活，完成状态: {allActivated}");
         }
 
-        if (allTriggered && !levelCompleted)
+        if (allActivated && !levelCompleted)
         {
             levelCompleted = true;
             OnLevelCompleted();
@@ -127,93 +147,17 @@ public class LevelCompletionManager : MonoBehaviour
     }
 
     /// <summary>
-    /// 检查分组完成条件
-    /// </summary>
-    bool CheckGroupCompletion()
-    {
-        // 获取所有有效的终点节点
-        var validFinishNodes = finishNodes.Where(node => node != null).ToList();
-        if (validFinishNodes.Count == 0) return false;
-
-        // 按组ID分组终点节点
-        var nodesByGroup = validFinishNodes.GroupBy(node => node.GroupID).ToList();
-
-        if (showDebugInfo)
-        {
-            Debug.Log($"[LevelCompletion] 检查分组完成条件，共 {nodesByGroup.Count} 个组");
-            foreach (var group in nodesByGroup)
-            {
-                Debug.Log($"[LevelCompletion] 组 {group.Key}: {group.Count()} 个节点");
-            }
-        }
-
-        // 检查是否有任何一个组的所有终点都被触发
-        foreach (var group in nodesByGroup)
-        {
-            var groupNodes = group.ToList();
-            bool groupComplete = groupNodes.All(node => triggeredNodes.Contains(node));
-            
-            if (showDebugInfo)
-            {
-                int triggeredInGroup = groupNodes.Count(node => triggeredNodes.Contains(node));
-                Debug.Log($"[LevelCompletion] 组 {group.Key}: {triggeredInGroup}/{groupNodes.Count} 个节点被触发，完成状态: {groupComplete}");
-            }
-
-            if (groupComplete)
-            {
-                if (showDebugInfo)
-                {
-                    Debug.Log($"[LevelCompletion] ✅ 组 {group.Key} 的所有终点都被触发！");
-                }
-                return true;
-            }
-        }
-
-        return false;
-    }
-
-    /// <summary>
-    /// 关卡完成时调用
+    /// ✅ 关卡完成
     /// </summary>
     void OnLevelCompleted()
     {
         if (showDebugInfo)
         {
-            if (requireSameGroup)
-            {
-                var completedGroup = GetCompletedGroup();
-                Debug.Log($"[LevelCompletion] 🎉 关卡完成！组 {completedGroup} 的所有终点都被触发，准备进入下一关...");
-            }
-            else
-            {
-                Debug.Log("[LevelCompletion] 🎉 关卡完成！所有终点都被触发，准备进入下一关...");
-            }
+            Debug.Log($"[LevelCompletion] 🎉 关卡完成！所有 {finishNodes.Count} 个终点都被激活，准备进入下一关...");
         }
 
-        // 可以在这里添加音效、特效等
-        
-        // 延迟加载下一关，给玩家反应时间
-        Invoke(nameof(LoadNextLevel), 1f);
-    }
-
-    /// <summary>
-    /// 获取已完成的组ID
-    /// </summary>
-    int GetCompletedGroup()
-    {
-        var validFinishNodes = finishNodes.Where(node => node != null).ToList();
-        var nodesByGroup = validFinishNodes.GroupBy(node => node.GroupID);
-
-        foreach (var group in nodesByGroup)
-        {
-            var groupNodes = group.ToList();
-            if (groupNodes.All(node => triggeredNodes.Contains(node)))
-            {
-                return group.Key;
-            }
-        }
-
-        return -1;
+        // 延迟进入下一关
+        Invoke(nameof(LoadNextLevel), 1.5f);
     }
 
     /// <summary>
@@ -221,6 +165,11 @@ public class LevelCompletionManager : MonoBehaviour
     /// </summary>
     void LoadNextLevel()
     {
+        if (showDebugInfo)
+        {
+            Debug.Log("[LevelCompletion] 🚀 载入下一关...");
+        }
+
         if (useSceneIndex)
         {
             UnityEngine.SceneManagement.SceneManager.LoadScene(nextSceneIndex);
@@ -232,101 +181,131 @@ public class LevelCompletionManager : MonoBehaviour
     }
 
     /// <summary>
-    /// 手动重置关卡状态
+    /// 重置关卡状态
     /// </summary>
+    [ContextMenu("重置关卡")]
     public void ResetLevel()
     {
-        triggeredNodes.Clear();
+        activatedNodes.Clear();
         levelCompleted = false;
+
+        // 重置所有终点触发器
+        foreach (var node in finishNodes)
+        {
+            if (node != null)
+            {
+                var trigger = node.GetComponent<FinishNodeTrigger>();
+                if (trigger != null)
+                {
+                    trigger.ResetActivation();
+                }
+            }
+        }
+
+        if (showDebugInfo)
+        {
+            Debug.Log("[LevelCompletion] 🔄 关卡状态已重置");
+        }
+    }
+
+    /// <summary>
+    /// 调试：显示当前状态
+    /// </summary>
+    [ContextMenu("显示当前状态")]
+    public void ShowCurrentStatus()
+    {
+        Debug.Log("=== 当前关卡状态 ===");
+        Debug.Log($"总终点数: {finishNodes.Count}");
+        Debug.Log($"已激活终点数: {activatedNodes.Count}");
+        Debug.Log($"关卡完成: {levelCompleted}");
+
+        foreach (var node in finishNodes)
+        {
+            if (node != null)
+            {
+                bool isActivated = activatedNodes.Contains(node);
+                Debug.Log($"  终点 {node.name}: {(isActivated ? "✅ 已激活" : "❌ 未激活")}");
+            }
+        }
+    }
+
+    /// <summary>
+    /// ✅ 批量更新所有终点的触发范围
+    /// </summary>
+    [ContextMenu("更新所有终点触发范围")]
+    public void UpdateAllTriggerRanges()
+    {
+        foreach (var node in finishNodes)
+        {
+            if (node != null)
+            {
+                var trigger = node.GetComponent<FinishNodeTrigger>();
+                if (trigger != null)
+                {
+                    trigger.triggerRadius = defaultTriggerRadius;
+                    trigger.UpdateColliderSize();
+                }
+            }
+        }
         
         if (showDebugInfo)
         {
-            Debug.Log("[LevelCompletion] 关卡状态已重置");
+            Debug.Log($"[LevelCompletion] 🔄 已更新所有终点触发范围为: {defaultTriggerRadius}");
         }
     }
 
-    /// <summary>
-    /// 添加终点节点
-    /// </summary>
-    public void AddFinishNode(PathNode node)
+    void Update()
     {
-        if (node != null && !finishNodes.Contains(node))
+        // 快捷键
+        if (Input.GetKeyDown(KeyCode.F5))
         {
-            finishNodes.Add(node);
-            SetupFinishNodes();
+            ShowCurrentStatus();
         }
-    }
-
-    /// <summary>
-    /// 移除终点节点
-    /// </summary>
-    public void RemoveFinishNode(PathNode node)
-    {
-        if (finishNodes.Contains(node))
+        if (Input.GetKeyDown(KeyCode.F6))
         {
-            finishNodes.Remove(node);
-            triggeredNodes.Remove(node);
+            ResetLevel();
+        }
+        // ✅ 新增：F7键批量更新触发范围
+        if (Input.GetKeyDown(KeyCode.F7))
+        {
+            UpdateAllTriggerRanges();
         }
     }
 
     void OnDrawGizmos()
     {
-        // 在Scene视图中显示终点节点
+        // 在Scene视图中显示终点状态
         foreach (var node in finishNodes)
         {
             if (node == null) continue;
 
-            // 根据是否被触发和组状态选择颜色
-            bool isTriggered = triggeredNodes.Contains(node);
-            
-            if (requireSameGroup)
+            // 根据激活状态显示颜色
+            bool isActivated = activatedNodes.Contains(node);
+            Gizmos.color = isActivated ? Color.green : Color.red;
+
+            // ✅ 使用实际的触发范围绘制
+            float actualRadius = defaultTriggerRadius;
+            var trigger = node.GetComponent<FinishNodeTrigger>();
+            if (trigger != null)
             {
-                // 分组模式：根据组的完成状态显示颜色
-                bool groupComplete = IsGroupComplete(node.GroupID);
-                if (groupComplete)
-                {
-                    Gizmos.color = Color.yellow; // 整个组完成
-                }
-                else if (isTriggered)
-                {
-                    Gizmos.color = Color.green; // 该节点被触发但组未完成
-                }
-                else
-                {
-                    Gizmos.color = Color.red; // 未触发
-                }
+                actualRadius = trigger.triggerRadius;
             }
-            else
-            {
-                // 原模式：单独节点状态
-                Gizmos.color = isTriggered ? Color.green : Color.red;
-            }
-            
+
             // 绘制终点标记
-            Gizmos.DrawWireSphere(node.transform.position, 0.3f);
-            Gizmos.DrawSphere(node.transform.position, 0.1f);
+            Gizmos.DrawWireSphere(node.transform.position, actualRadius);
+            Gizmos.DrawSphere(node.transform.position, actualRadius * 0.3f);
         }
 
         // 显示完成状态
         if (levelCompleted)
         {
-            Gizmos.color = Color.cyan;
-            Vector3 center = Vector3.zero;
+            Gizmos.color = Color.yellow;
             if (finishNodes.Count > 0)
             {
-                center = finishNodes.Where(n => n != null)
-                                  .Aggregate(Vector3.zero, (sum, node) => sum + node.transform.position) / finishNodes.Count;
+                Vector3 center = finishNodes.Where(n => n != null)
+                                          .Aggregate(Vector3.zero, (sum, node) => sum + node.transform.position) / finishNodes.Count;
+                Gizmos.DrawWireSphere(center, 1f);
             }
-            Gizmos.DrawWireSphere(center, 1f);
         }
-    }
-
-    /// <summary>
-    /// 检查指定组是否完成
-    /// </summary>
-    bool IsGroupComplete(int groupID)
-    {
-        var groupNodes = finishNodes.Where(node => node != null && node.GroupID == groupID).ToList();
-        return groupNodes.Count > 0 && groupNodes.All(node => triggeredNodes.Contains(node));
     }
 }

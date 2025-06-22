@@ -23,7 +23,7 @@ public class PuzzleGroup : MonoBehaviour
         pieces.Add(piece);
         piece.currentGroup = this;
 
-        // ✅ 保留世界位置，避免节点层级被改变影响 parentPiece
+        // 保留世界位置，避免节点层级被改变影响 parentPiece
         piece.transform.SetParent(this.transform, worldPositionStays: true);
 
         Vector3 closestPos = FindClosestSnapPosition(piece);
@@ -42,6 +42,7 @@ public class PuzzleGroup : MonoBehaviour
 
         Debug.Log($"[PuzzleGroup] 从组 {groupID} 移除 {piece.name}");
 
+        // ✅ 如果组为空，销毁该组
         if (pieces.Count == 0)
         {
             Destroy(gameObject);
@@ -55,27 +56,34 @@ public class PuzzleGroup : MonoBehaviour
         return new Vector3(Mathf.Round(pos.x), Mathf.Round(pos.y), 0f);
     }
 
+    /// <summary>
+    /// ✅ 简化的组合并方法 - 现在主要由PuzzlePiece的ReorganizeConnectedPuzzles处理
+    /// </summary>
     public void AbsorbGroup(PuzzleGroup other)
     {
-        foreach (var piece in other.pieces)
+        if (other == null || other == this) return;
+
+        // 将另一个组的所有拼图加入当前组
+        var otherPieces = new List<PuzzlePiece>(other.pieces); // 创建副本避免修改原列表时出错
+        
+        foreach (var piece in otherPieces)
         {
             this.AddPiece(piece);
         }
 
-        // ✅ 设置新组 ID
-        int newGroupID = this.GetInstanceID();
-        foreach (var p in this.pieces)
+        // 销毁空组
+        if (other.pieces.Count == 0)
         {
-            if (p.originalGroupID == 0)
-                p.originalGroupID = p.initialGroupID;
-
-            p.initialGroupID = newGroupID;
+            Destroy(other.gameObject);
         }
 
-        Destroy(other.gameObject);
+        Debug.Log($"[PuzzleGroup] 组 {other.groupID} 被吸收到组 {groupID}");
     }
+
     public void RotateGroup(float angleDegrees = 90f)
     {
+        if (pieces.Count == 0) return;
+
         Vector3 center = Vector3.zero;
         foreach (var piece in pieces)
         {
@@ -92,5 +100,42 @@ public class PuzzleGroup : MonoBehaviour
         }
 
         Debug.Log($"[PuzzleGroup] 组 {groupID} 旋转 {angleDegrees} 度");
+    }
+
+    /// <summary>
+    /// ✅ 新增：检查组内所有拼图是否物理连接
+    /// </summary>
+    public bool AreAllPiecesConnected()
+    {
+        if (pieces.Count <= 1) return true;
+
+        // 使用第一个拼图作为起点，检查是否能通过物理连接到达所有拼图
+        var visited = new HashSet<PuzzlePiece>();
+        var toVisit = new Queue<PuzzlePiece>();
+        
+        toVisit.Enqueue(pieces[0]);
+        visited.Add(pieces[0]);
+
+        while (toVisit.Count > 0)
+        {
+            var current = toVisit.Dequeue();
+            
+            foreach (var other in pieces)
+            {
+                if (!visited.Contains(other) && current.IsPhysicallyConnected(current, other))
+                {
+                    visited.Add(other);
+                    toVisit.Enqueue(other);
+                }
+            }
+        }
+
+        bool allConnected = visited.Count == pieces.Count;
+        if (!allConnected)
+        {
+            Debug.LogWarning($"[PuzzleGroup] 组 {groupID} 中有 {pieces.Count - visited.Count} 个拼图未连接");
+        }
+
+        return allConnected;
     }
 }

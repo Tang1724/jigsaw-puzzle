@@ -1,98 +1,150 @@
 using UnityEngine;
 
 /// <summary>
-/// 终点节点触发器，负责检测玩家进入/离开
+/// 简化版终点触发器 - 只要有Player进入就激活
 /// </summary>
 public class FinishNodeTrigger : MonoBehaviour
 {
+    [Header("触发范围设置")]
+    [Tooltip("终点的触发范围半径")]
+    public float triggerRadius = 0.1f;
+    
+    [Header("调试设置")]
+    [Tooltip("是否显示触发范围")]
+    public bool showTriggerRange = true;
+    
     private LevelCompletionManager manager;
     private PathNode thisNode;
-    private bool playerInside = false;
+    private bool isActivated = false;
 
-    /// <summary>
-    /// 初始化触发器
-    /// </summary>
     public void Initialize(LevelCompletionManager completionManager, PathNode node)
     {
         manager = completionManager;
         thisNode = node;
+        
+        // ✅ 初始化时更新碰撞器范围
+        UpdateColliderSize();
+    }
+
+    void Start()
+    {
+        // 确保碰撞器范围正确
+        UpdateColliderSize();
+    }
+
+    /// <summary>
+    /// ✅ 更新碰撞器大小
+    /// </summary>
+    public void UpdateColliderSize()
+    {
+        CircleCollider2D collider = GetComponent<CircleCollider2D>();
+        if (collider != null)
+        {
+            collider.radius = triggerRadius;
+            collider.isTrigger = true;
+        }
     }
 
     void OnTriggerEnter2D(Collider2D other)
     {
+        // ✅ 只检查Player标签
         if (!other.CompareTag("Player")) return;
         if (manager == null || thisNode == null) return;
 
-        // ✅ 检查玩家与终点节点是否在同一拼图组
-        if (!IsSameGroup(other.gameObject))
+        // ✅ 如果还没激活，就激活这个终点
+        if (!isActivated)
         {
-            return; // 不同组，不触发
+            isActivated = true;
+            // 使用旧方法名来兼容
+            manager.OnPlayerEnterFinish(thisNode);
+            Debug.Log($"[FinishTrigger] ✅ 终点 {thisNode.name} 被Player {other.name} 激活！(触发范围: {triggerRadius})");
         }
-
-        playerInside = true;
-        manager.OnPlayerEnterFinish(thisNode);
     }
 
     void OnTriggerExit2D(Collider2D other)
     {
+        // ✅ 当Player离开时，检查是否还有其他Player在内部
         if (!other.CompareTag("Player")) return;
-        if (manager == null || thisNode == null) return;
-        if (!playerInside) return;
+        if (!isActivated) return;
 
-        // ✅ 检查玩家与终点节点是否在同一拼图组
-        if (!IsSameGroup(other.gameObject))
+        // ✅ 使用可调节的触发范围检查
+        Collider2D[] playersInside = Physics2D.OverlapCircleAll(transform.position, triggerRadius);
+        bool hasPlayerInside = false;
+
+        foreach (var collider in playersInside)
         {
-            return; // 不同组，不处理
-        }
-
-        playerInside = false;
-        manager.OnPlayerExitFinish(thisNode);
-    }
-
-    void OnTriggerStay2D(Collider2D other)
-    {
-        // 确保玩家持续在触发区域内
-        if (!other.CompareTag("Player")) return;
-        if (manager == null || thisNode == null) return;
-
-        // ✅ 检查玩家与终点节点是否在同一拼图组
-        if (!IsSameGroup(other.gameObject))
-        {
-            // 如果玩家之前在里面但现在不同组了，需要触发退出
-            if (playerInside)
+            if (collider.CompareTag("Player") && collider != other)
             {
-                playerInside = false;
-                manager.OnPlayerExitFinish(thisNode);
+                hasPlayerInside = true;
+                break;
             }
-            return;
         }
 
-        if (!playerInside)
+        // ✅ 如果没有Player了，取消激活
+        if (!hasPlayerInside)
         {
-            playerInside = true;
-            manager.OnPlayerEnterFinish(thisNode);
+            isActivated = false;
+            // 使用旧方法名来兼容
+            manager.OnPlayerExitFinish(thisNode);
+            Debug.Log($"[FinishTrigger] ❌ 终点 {thisNode.name} 失活，Player {other.name} 离开且无其他Player");
         }
     }
 
     /// <summary>
-    /// 判断玩家是否与终点节点在同一拼图组
+    /// 获取激活状态
     /// </summary>
-    bool IsSameGroup(GameObject player)
+    public bool IsActivated => isActivated;
+
+    /// <summary>
+    /// 手动重置状态
+    /// </summary>
+    public void ResetActivation()
     {
-        var playerPiece = player.GetComponentInParent<PuzzlePiece>();
-        if (playerPiece == null || thisNode == null) 
+        isActivated = false;
+    }
+
+    /// <summary>
+    /// ✅ 在编辑器中显示触发范围
+    /// </summary>
+    void OnDrawGizmos()
+    {
+        if (!showTriggerRange) return;
+
+        // 根据激活状态选择颜色
+        if (Application.isPlaying)
         {
-            Debug.LogWarning($"[FinishNodeTrigger] 玩家或终点节点没有拼图组信息");
-            return false;
+            Gizmos.color = isActivated ? Color.green : Color.red;
+        }
+        else
+        {
+            Gizmos.color = Color.yellow;
         }
 
-        bool sameGroup = playerPiece.GroupID == thisNode.GroupID;
+        // 绘制触发范围
+        Gizmos.DrawWireSphere(transform.position, triggerRadius);
         
-        if (manager.showDebugInfo)
+        // 绘制填充圆圈（透明）
+        Color fillColor = Gizmos.color;
+        fillColor.a = 0.2f;
+        Gizmos.color = fillColor;
+        Gizmos.DrawSphere(transform.position, triggerRadius);
+    }
+
+    /// <summary>
+    /// ✅ 编辑器中值改变时自动更新
+    /// </summary>
+    void OnValidate()
+    {
+        // 确保触发范围不为负数
+        if (triggerRadius < 0.1f)
         {
-            Debug.Log($"[FinishNodeTrigger] 组检查: 玩家组ID {playerPiece.GroupID}, 终点组ID {thisNode.GroupID}, 同组: {sameGroup}");
+            triggerRadius = 0.1f;
         }
 
-        return sameGroup;
+        // 实时更新碰撞器大小（仅在编辑模式下）
+        if (!Application.isPlaying)
+        {
+            UpdateColliderSize();
+        }
     }
 }

@@ -1,8 +1,6 @@
 using UnityEngine;
+using System.Collections.Generic;
 
-/// <summary>
-/// 玩家分流器：穿过触发器后在两个节点生成新玩家，并销毁原玩家
-/// </summary>
 [RequireComponent(typeof(Collider2D))]
 public class PlayerSplitterTrigger : MonoBehaviour
 {
@@ -13,13 +11,22 @@ public class PlayerSplitterTrigger : MonoBehaviour
     [Header("玩家预制体（必须包含 PathMover + PuzzlePiece）")]
     public GameObject playerPrefab;
 
-    [Header("是否只触发一次")]
-    public bool triggerOnce = true;
+    [Header("触发方向设置")]
+    public TriggerDirection triggerDirection = TriggerDirection.LeftToRight;
 
     [Header("调试选项")]
     public bool debugMode = true;
+    public bool showDirectionArrow = true;
 
-    private bool hasTriggered = false;
+    public enum TriggerDirection
+    {
+        LeftToRight,
+        RightToLeft,
+        TopToBottom,
+        BottomToTop
+    }
+
+    private Dictionary<GameObject, Vector3> playersInTrigger = new Dictionary<GameObject, Vector3>();
 
     private void Awake()
     {
@@ -30,29 +37,70 @@ public class PlayerSplitterTrigger : MonoBehaviour
     private void OnTriggerEnter2D(Collider2D other)
     {
         if (!other.CompareTag("Player")) return;
-        if (hasTriggered && triggerOnce) return;
 
+        GameObject player = other.gameObject;
+        playersInTrigger[player] = player.transform.position;
+
+        if (debugMode)
+        {
+            Debug.Log($"[PlayerSplitter] 🎯 玩家 {player.name} 进入触发器，位置: {player.transform.position}");
+        }
+    }
+
+    private void OnTriggerExit2D(Collider2D other)
+    {
+        if (!other.CompareTag("Player")) return;
+
+        GameObject player = other.gameObject;
+        if (!playersInTrigger.ContainsKey(player)) return;
+
+        Vector3 enterPosition = playersInTrigger[player];
+        Vector3 exitPosition = player.transform.position;
+
+        if (IsValidDirection(enterPosition, exitPosition))
+        {
+            if (debugMode)
+            {
+                Debug.Log($"[PlayerSplitter] ✅ 玩家 {player.name} 触发分流器！");
+            }
+
+            SplitPlayer(player);
+        }
+
+        playersInTrigger.Remove(player);
+    }
+
+    private bool IsValidDirection(Vector3 enterPos, Vector3 exitPos)
+    {
+        Vector3 movement = exitPos - enterPos;
+        switch (triggerDirection)
+        {
+            case TriggerDirection.LeftToRight:
+                return movement.x > 0.1f;
+            case TriggerDirection.RightToLeft:
+                return movement.x < -0.1f;
+            case TriggerDirection.TopToBottom:
+                return movement.y < -0.1f;
+            case TriggerDirection.BottomToTop:
+                return movement.y > 0.1f;
+            default:
+                return false;
+        }
+    }
+
+    private void SplitPlayer(GameObject originalPlayer)
+    {
         if (spawnNodeA == null || spawnNodeB == null || playerPrefab == null)
         {
             Debug.LogWarning("[PlayerSplitter] ❌ 缺少必要设置（节点或预制体未设置）");
             return;
         }
 
-        GameObject originalPlayer = other.gameObject;
-        PuzzlePiece oldPiece = other.GetComponentInParent<PuzzlePiece>();
+        PuzzlePiece oldPiece = originalPlayer.GetComponentInParent<PuzzlePiece>();
         int groupID = oldPiece != null ? oldPiece.GroupID : -1;
 
         SpriteRenderer originalSprite = originalPlayer.GetComponent<SpriteRenderer>();
         PathMover originalMover = originalPlayer.GetComponent<PathMover>();
-
-        if (debugMode)
-        {
-            Debug.Log($"[PlayerSplitter] 📋 原玩家信息:");
-            Debug.Log($"  - 组ID: {groupID}");
-            Debug.Log($"  - Sprite: {(originalSprite?.sprite?.name ?? "无")}");
-            Debug.Log($"  - 位置: {originalPlayer.transform.position}");
-            Debug.Log($"  - PathMover状态: {(originalMover != null ? "存在" : "缺失")}");
-        }
 
         PlayerData originalData = new PlayerData
         {
@@ -65,12 +113,11 @@ public class PlayerSplitterTrigger : MonoBehaviour
             groupID = groupID
         };
 
-        Destroy(originalPlayer);
+        // ✅ 改为隐藏原始玩家而不是销毁
+        originalPlayer.SetActive(false);
 
         SpawnNewPlayer(spawnNodeA, originalData, "A");
         SpawnNewPlayer(spawnNodeB, originalData, "B");
-
-        hasTriggered = true;
     }
 
     private struct PlayerData
@@ -92,15 +139,7 @@ public class PlayerSplitterTrigger : MonoBehaviour
             return;
         }
 
-        Debug.Log($"🎯 开始生成 Player_{label} 在节点: {node.name}");
-
         GameObject newPlayer = Instantiate(playerPrefab, node.transform.position, Quaternion.identity);
-        if (newPlayer == null)
-        {
-            Debug.LogError($"[PlayerSplitter] ❌ 玩家预制体生成失败！");
-            return;
-        }
-
         newPlayer.name = $"Player_{label}";
         newPlayer.SetActive(true);
 
@@ -110,8 +149,7 @@ public class PlayerSplitterTrigger : MonoBehaviour
         if (targetPiece != null)
         {
             Vector3 worldScale = originalData.worldScale;
-
-            newPlayer.transform.SetParent(targetPiece.transform, worldPositionStays: false);
+            newPlayer.transform.SetParent(targetPiece.transform, false);
             newPlayer.transform.position = node.transform.position;
 
             Vector3 parentScale = targetPiece.transform.lossyScale;
@@ -120,71 +158,37 @@ public class PlayerSplitterTrigger : MonoBehaviour
                 worldScale.y / (parentScale.y != 0 ? parentScale.y : 1),
                 worldScale.z / (parentScale.z != 0 ? parentScale.z : 1)
             );
-
-            Debug.Log($"[PlayerSplitter] ✅ Player_{label} 设置为 {targetPiece.name} 子对象，恢复原始缩放");
-        }
-        else
-        {
-            Debug.LogWarning($"[PlayerSplitter] ⚠️ 无法找到节点 {node.name} 所属的拼图块");
         }
 
         SetupPathMover(newPlayer, node, originalData.groupID, label);
         SetupPuzzlePiece(newPlayer, originalData.groupID, label);
         EnableAllComponents(newPlayer, label);
 
-        var allNodes = newPlayer.GetComponentsInChildren<PathNode>();
-        foreach (var pNode in allNodes)
+        foreach (var pNode in newPlayer.GetComponentsInChildren<PathNode>())
         {
-            if (pNode != null)
-            {
-                pNode.AssignParentPiece(); // 确保该方法为 public
-                pNode.RefreshPathLines();
-                Debug.Log($"[PlayerSplitter] 🔁 节点 {pNode.name} 路径线已刷新");
-            }
+            pNode.AssignParentPiece();
+            pNode.RefreshPathLines();
         }
 
-        // ✅ 关键修复：刷新所有 PathNode 的 parentPiece，确保路径段所属拼图正确
         RefreshAllPathNodeGroupIDs();
 
-        // ✅ 每个玩家生成后立即刷新其路径状态
         var mover = newPlayer.GetComponent<PathMover>();
         var piece = newPlayer.GetComponentInParent<PuzzlePiece>();
         if (mover != null && piece != null)
         {
             mover.ForceUpdateGroupID(piece.GroupID);
             mover.RefreshPaths();
-            Debug.Log($"[PlayerSplitter] 🔁 Player_{label} 路径状态刷新完成");
         }
-
-        if (debugMode)
-        {
-            var finalSprite = newPlayer.GetComponent<SpriteRenderer>();
-            Debug.Log($"🔍 Player_{label} 最终检查:");
-            Debug.Log($"  - Sprite: {(finalSprite?.sprite?.name ?? "无")}");
-            Debug.Log($"  - 位置: {newPlayer.transform.position}");
-            Debug.Log($"  - 激活状态: {newPlayer.activeInHierarchy}");
-        }
-
-        Debug.Log($"[PlayerSplitter] 🎯 Player_{label} 创建完成！");
     }
 
     private void CopyRenderingFromOriginal(GameObject newPlayer, PlayerData originalData, string label)
     {
         var newSprite = newPlayer.GetComponent<SpriteRenderer>();
-        if (newSprite == null)
-        {
-            Debug.LogError($"[PlayerSplitter] ❌ Player_{label} 缺少SpriteRenderer组件！");
-            return;
-        }
+        if (newSprite == null) return;
 
         newSprite.sprite = originalData.sprite;
         Color spriteColor = originalData.spriteColor;
-
-        if (spriteColor.a <= 0.01f)
-        {
-            spriteColor.a = 1;
-            Debug.LogWarning($"[PlayerSplitter] ⚠️ 原颜色透明，已设置为不透明");
-        }
+        if (spriteColor.a <= 0.01f) spriteColor.a = 1f;
 
         newSprite.color = spriteColor;
         newSprite.sortingLayerName = string.IsNullOrEmpty(originalData.sortingLayerName) ? "Default" : originalData.sortingLayerName;
@@ -192,72 +196,99 @@ public class PlayerSplitterTrigger : MonoBehaviour
         newSprite.enabled = true;
 
         newPlayer.transform.localScale = originalData.scale == Vector3.zero ? Vector3.one : originalData.scale;
-
-        Debug.Log($"[PlayerSplitter] ✅ Player_{label} 渲染设置完成，sprite: {(newSprite.sprite?.name ?? "无")}");
     }
 
     private void SetupPathMover(GameObject newPlayer, PathNode startNode, int groupID, string label)
     {
         var mover = newPlayer.GetComponent<PathMover>();
-        if (mover == null)
-        {
-            Debug.LogWarning($"[PlayerSplitter] ⚠️ Player_{label} 缺少PathMover组件");
-            return;
-        }
+        if (mover == null) return;
 
         mover.enabled = false;
         mover.startNode = startNode;
         mover.transform.position = startNode.transform.position;
         mover.ForceUpdateGroupID(groupID);
         mover.enabled = true;
-
-        Debug.Log($"[PlayerSplitter] 🚶 Player_{label} PathMover设置完成，起点: {startNode.name}");
     }
 
     private void SetupPuzzlePiece(GameObject newPlayer, int groupID, string label)
     {
         var piece = newPlayer.GetComponentInParent<PuzzlePiece>();
-        if (piece == null)
-        {
-            Debug.LogWarning($"[PlayerSplitter] ⚠️ Player_{label} 缺少PuzzlePiece组件");
-            return;
-        }
+        if (piece == null) return;
 
         piece.enabled = true;
         piece.initialGroupID = groupID;
         piece.originalGroupID = groupID;
-
-        Debug.Log($"[PlayerSplitter] 🧩 Player_{label} PuzzlePiece设置完成，组ID: {groupID}");
     }
 
     private void EnableAllComponents(GameObject newPlayer, string label)
     {
         var collider = newPlayer.GetComponent<Collider2D>();
-        if (collider != null)
-        {
-            collider.enabled = true;
-            Debug.Log($"[PlayerSplitter] 🔲 Player_{label} Collider2D已启用");
-        }
+        if (collider != null) collider.enabled = true;
 
         var rigidbody = newPlayer.GetComponent<Rigidbody2D>();
-        if (rigidbody != null)
-        {
-            rigidbody.simulated = true;
-            Debug.Log($"[PlayerSplitter] 🏃 Player_{label} Rigidbody2D已启用");
-        }
-
-        Debug.Log($"[PlayerSplitter] ✅ Player_{label} 所有组件已启用");
+        if (rigidbody != null) rigidbody.simulated = true;
     }
 
-    /// <summary>
-    /// 强制刷新所有 PathNode 的 parentPiece 引用（用于路径段所属判断）
-    /// </summary>
     private void RefreshAllPathNodeGroupIDs()
     {
-        PathNode[] allNodes = FindObjectsOfType<PathNode>(true);
-        foreach (var node in allNodes)
+        foreach (var node in FindObjectsOfType<PathNode>(true))
         {
             node.AssignParentPiece();
         }
+    }
+
+    private void OnDrawGizmos()
+    {
+        if (!showDirectionArrow) return;
+        var collider = GetComponent<Collider2D>();
+        if (collider == null) return;
+
+        Vector3 center = transform.position;
+        Vector3 size = Vector3.one;
+
+        if (collider is BoxCollider2D boxCollider)
+        {
+            size = boxCollider.size;
+        }
+        else if (collider is CircleCollider2D circleCollider)
+        {
+            float diameter = circleCollider.radius * 2;
+            size = new Vector3(diameter, diameter, 1);
+        }
+
+        Gizmos.color = new Color(1, 1, 0, 0.3f);
+        Gizmos.DrawCube(center, size);
+
+        Gizmos.color = Color.red;
+        Vector3 arrowStart = center;
+        Vector3 arrowEnd = center;
+
+        switch (triggerDirection)
+        {
+            case TriggerDirection.LeftToRight:
+                arrowStart.x -= size.x * 0.3f;
+                arrowEnd.x += size.x * 0.3f;
+                break;
+            case TriggerDirection.RightToLeft:
+                arrowStart.x += size.x * 0.3f;
+                arrowEnd.x -= size.x * 0.3f;
+                break;
+            case TriggerDirection.TopToBottom:
+                arrowStart.y += size.y * 0.3f;
+                arrowEnd.y -= size.y * 0.3f;
+                break;
+            case TriggerDirection.BottomToTop:
+                arrowStart.y -= size.y * 0.3f;
+                arrowEnd.y += size.y * 0.3f;
+                break;
+        }
+
+        Gizmos.DrawLine(arrowStart, arrowEnd);
+        Vector3 direction = (arrowEnd - arrowStart).normalized;
+        Vector3 arrowHead1 = arrowEnd - direction * 0.2f + Vector3.Cross(direction, Vector3.forward) * 0.1f;
+        Vector3 arrowHead2 = arrowEnd - direction * 0.2f - Vector3.Cross(direction, Vector3.forward) * 0.1f;
+
+        Gizmos.DrawLine(arrowEnd, arrowHead1);
+        Gizmos.DrawLine(arrowEnd, arrowHead2);
     }
 }

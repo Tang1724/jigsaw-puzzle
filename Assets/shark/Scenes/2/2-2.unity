@@ -447,7 +447,7 @@ MonoBehaviour:
   initialGroupID: 1
   originalGroupID: 0
   physicalConnectionTolerance: 0.1
-  snapTolerance: 0.3
+  snapTolerance: 1
   isSnapSuccessful: 0
 --- !u!61 &324448057
 BoxCollider2D:
@@ -1092,7 +1092,7 @@ MonoBehaviour:
   initialGroupID: 2
   originalGroupID: 0
   physicalConnectionTolerance: 0.1
-  snapTolerance: 0.3
+  snapTolerance: 1
   isSnapSuccessful: 0
 --- !u!61 &954522217
 BoxCollider2D:
@@ -2071,6 +2071,58 @@ Transform:
   m_Children: []
   m_Father: {fileID: 954522219}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &2106342932
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 2106342934}
+  - component: {fileID: 2106342933}
+  m_Layer: 0
+  m_Name: GameManager
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &2106342933
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2106342932}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d04bbd817382fa943ba4bdee61698251, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  finishNodes:
+  - {fileID: 1313528313}
+  - {fileID: 410449025}
+  nextSceneName: 2-3
+  useSceneIndex: 0
+  nextSceneIndex: 1
+  requireSameGroup: 1
+  showDebugInfo: 1
+--- !u!4 &2106342934
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2106342932}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: -2.1684914, y: 1.5559438, z: -0.010374138}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &2140747005
 GameObject:
   m_ObjectHideFlags: 0
@@ -2109,7 +2161,7 @@ MonoBehaviour:
   initialGroupID: 2
   originalGroupID: 0
   physicalConnectionTolerance: 0.1
-  snapTolerance: 0.3
+  snapTolerance: 1
   isSnapSuccessful: 0
 --- !u!61 &2140747007
 BoxCollider2D:
@@ -2269,7 +2321,7 @@ MonoBehaviour:
   initialGroupID: 0
   originalGroupID: 0
   physicalConnectionTolerance: 0.1
-  snapTolerance: 0.3
+  snapTolerance: 1
   isSnapSuccessful: 0
 --- !u!61 &2140786398
 BoxCollider2D:
@@ -2399,3 +2451,4 @@ SceneRoots:
   - {fileID: 2140786400}
   - {fileID: 954522219}
   - {fileID: 2140747009}
+  - {fileID: 2106342934}
