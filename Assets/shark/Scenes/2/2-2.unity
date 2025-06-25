@@ -373,16 +373,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   connectedPaths:
-  - targetNode: {fileID: 1942762785}
-    direction: 1
-    lineMaterial: {fileID: 0}
-    dashedLineMaterial: {fileID: 0}
-    lineWidth: 0.1
-    lineColor: {r: 0, g: 1, b: 0, a: 1}
-    dashedLineColor: {r: 0.5, g: 0.5, b: 0.5, a: 1}
-    sortingOrder: 2
-    isActive: 1
-    lineRenderer: {fileID: 0}
   - targetNode: {fileID: 187826386}
     direction: 0
     lineMaterial: {fileID: 0}
@@ -619,6 +609,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d2676c8eaa68b554580dc7fd1f31e04d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  triggerRadius: 0.1
+  showTriggerRange: 1
 --- !u!61 &410449023
 BoxCollider2D:
   m_ObjectHideFlags: 0
@@ -837,7 +829,7 @@ Transform:
   m_GameObject: {fileID: 579366063}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -0.1, y: 0, z: 0}
+  m_LocalPosition: {x: -0.15, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -858,8 +850,9 @@ MonoBehaviour:
   spawnNodeA: {fileID: 1961509410}
   spawnNodeB: {fileID: 306238179}
   playerPrefab: {fileID: 1743422841}
-  triggerOnce: 0
+  triggerDirection: 0
   debugMode: 1
+  showDirectionArrow: 1
 --- !u!61 &579366066
 BoxCollider2D:
   m_ObjectHideFlags: 0
@@ -1319,6 +1312,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d2676c8eaa68b554580dc7fd1f31e04d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  triggerRadius: 0.1
+  showTriggerRange: 1
 --- !u!61 &1313528311
 BoxCollider2D:
   m_ObjectHideFlags: 0
@@ -1913,26 +1908,6 @@ MonoBehaviour:
     sortingOrder: 2
     isActive: 1
     lineRenderer: {fileID: 0}
-  - targetNode: {fileID: 1961509410}
-    direction: 1
-    lineMaterial: {fileID: 0}
-    dashedLineMaterial: {fileID: 0}
-    lineWidth: 0.1
-    lineColor: {r: 0, g: 1, b: 0, a: 1}
-    dashedLineColor: {r: 0.5, g: 0.5, b: 0.5, a: 1}
-    sortingOrder: 2
-    isActive: 1
-    lineRenderer: {fileID: 0}
-  - targetNode: {fileID: 306238179}
-    direction: 1
-    lineMaterial: {fileID: 0}
-    dashedLineMaterial: {fileID: 0}
-    lineWidth: 0.1
-    lineColor: {r: 0, g: 1, b: 0, a: 1}
-    dashedLineColor: {r: 0.5, g: 0.5, b: 0.5, a: 1}
-    sortingOrder: 2
-    isActive: 1
-    lineRenderer: {fileID: 0}
   parentPiece: {fileID: 324448056}
 --- !u!4 &1942762786
 Transform:
@@ -1979,16 +1954,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   connectedPaths:
-  - targetNode: {fileID: 1942762785}
-    direction: 1
-    lineMaterial: {fileID: 0}
-    dashedLineMaterial: {fileID: 0}
-    lineWidth: 0.1
-    lineColor: {r: 0, g: 1, b: 0, a: 1}
-    dashedLineColor: {r: 0.5, g: 0.5, b: 0.5, a: 1}
-    sortingOrder: 2
-    isActive: 1
-    lineRenderer: {fileID: 0}
   - targetNode: {fileID: 166690036}
     direction: 0
     lineMaterial: {fileID: 0}
@@ -2103,10 +2068,10 @@ MonoBehaviour:
   finishNodes:
   - {fileID: 1313528313}
   - {fileID: 410449025}
+  defaultTriggerRadius: 0.3
   nextSceneName: 2-3
   useSceneIndex: 0
   nextSceneIndex: 1
-  requireSameGroup: 1
   showDebugInfo: 1
 --- !u!4 &2106342934
 Transform:

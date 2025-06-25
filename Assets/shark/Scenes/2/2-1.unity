@@ -147,7 +147,7 @@ Transform:
   m_GameObject: {fileID: 107708915}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -0.1, y: 0, z: 0}
+  m_LocalPosition: {x: -0.15, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -1028,16 +1028,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   connectedPaths:
-  - targetNode: {fileID: 1507506608}
-    direction: 1
-    lineMaterial: {fileID: 0}
-    dashedLineMaterial: {fileID: 0}
-    lineWidth: 0.1
-    lineColor: {r: 0, g: 1, b: 0, a: 1}
-    dashedLineColor: {r: 0.5, g: 0.5, b: 0.5, a: 1}
-    sortingOrder: 2
-    isActive: 1
-    lineRenderer: {fileID: 0}
   - targetNode: {fileID: 877535479}
     direction: 0
     lineMaterial: {fileID: 0}
@@ -1458,26 +1448,6 @@ MonoBehaviour:
     sortingOrder: 2
     isActive: 1
     lineRenderer: {fileID: 0}
-  - targetNode: {fileID: 1676946386}
-    direction: 1
-    lineMaterial: {fileID: 0}
-    dashedLineMaterial: {fileID: 0}
-    lineWidth: 0.1
-    lineColor: {r: 0, g: 1, b: 0, a: 1}
-    dashedLineColor: {r: 0.5, g: 0.5, b: 0.5, a: 1}
-    sortingOrder: 2
-    isActive: 1
-    lineRenderer: {fileID: 0}
-  - targetNode: {fileID: 848146374}
-    direction: 1
-    lineMaterial: {fileID: 0}
-    dashedLineMaterial: {fileID: 0}
-    lineWidth: 0.1
-    lineColor: {r: 0, g: 1, b: 0, a: 1}
-    dashedLineColor: {r: 0.5, g: 0.5, b: 0.5, a: 1}
-    sortingOrder: 2
-    isActive: 1
-    lineRenderer: {fileID: 0}
   parentPiece: {fileID: 544717459}
 --- !u!4 &1507506609
 Transform:
@@ -1524,16 +1494,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   connectedPaths:
-  - targetNode: {fileID: 1507506608}
-    direction: 1
-    lineMaterial: {fileID: 0}
-    dashedLineMaterial: {fileID: 0}
-    lineWidth: 0.1
-    lineColor: {r: 0, g: 1, b: 0, a: 1}
-    dashedLineColor: {r: 0.5, g: 0.5, b: 0.5, a: 1}
-    sortingOrder: 2
-    isActive: 1
-    lineRenderer: {fileID: 0}
   - targetNode: {fileID: 1446486385}
     direction: 0
     lineMaterial: {fileID: 0}

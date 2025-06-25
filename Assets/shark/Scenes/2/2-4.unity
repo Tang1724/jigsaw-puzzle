@@ -742,7 +742,7 @@ Transform:
   m_GameObject: {fileID: 661999928}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -0.1, y: 0, z: 0}
+  m_LocalPosition: {x: -0.15, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -763,8 +763,9 @@ MonoBehaviour:
   spawnNodeA: {fileID: 760490854}
   spawnNodeB: {fileID: 1297206679}
   playerPrefab: {fileID: 1703701111}
-  triggerOnce: 0
+  triggerDirection: 0
   debugMode: 1
+  showDirectionArrow: 1
 --- !u!61 &661999931
 BoxCollider2D:
   m_ObjectHideFlags: 0
@@ -1449,16 +1450,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   connectedPaths:
-  - targetNode: {fileID: 1075886140}
-    direction: 1
-    lineMaterial: {fileID: 0}
-    dashedLineMaterial: {fileID: 0}
-    lineWidth: 0.1
-    lineColor: {r: 0, g: 1, b: 0, a: 1}
-    dashedLineColor: {r: 0.5, g: 0.5, b: 0.5, a: 1}
-    sortingOrder: 2
-    isActive: 1
-    lineRenderer: {fileID: 0}
   - targetNode: {fileID: 1184237479}
     direction: 0
     lineMaterial: {fileID: 0}
@@ -1573,26 +1564,6 @@ MonoBehaviour:
   connectedPaths:
   - targetNode: {fileID: 1086680477}
     direction: 0
-    lineMaterial: {fileID: 0}
-    dashedLineMaterial: {fileID: 0}
-    lineWidth: 0.1
-    lineColor: {r: 0, g: 1, b: 0, a: 1}
-    dashedLineColor: {r: 0.5, g: 0.5, b: 0.5, a: 1}
-    sortingOrder: 2
-    isActive: 1
-    lineRenderer: {fileID: 0}
-  - targetNode: {fileID: 760490854}
-    direction: 1
-    lineMaterial: {fileID: 0}
-    dashedLineMaterial: {fileID: 0}
-    lineWidth: 0.1
-    lineColor: {r: 0, g: 1, b: 0, a: 1}
-    dashedLineColor: {r: 0.5, g: 0.5, b: 0.5, a: 1}
-    sortingOrder: 2
-    isActive: 1
-    lineRenderer: {fileID: 0}
-  - targetNode: {fileID: 1297206679}
-    direction: 1
     lineMaterial: {fileID: 0}
     dashedLineMaterial: {fileID: 0}
     lineWidth: 0.1
@@ -1825,16 +1796,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   connectedPaths:
-  - targetNode: {fileID: 1075886140}
-    direction: 1
-    lineMaterial: {fileID: 0}
-    dashedLineMaterial: {fileID: 0}
-    lineWidth: 0.1
-    lineColor: {r: 0, g: 1, b: 0, a: 1}
-    dashedLineColor: {r: 0.5, g: 0.5, b: 0.5, a: 1}
-    sortingOrder: 2
-    isActive: 1
-    lineRenderer: {fileID: 0}
   - targetNode: {fileID: 250652566}
     direction: 0
     lineMaterial: {fileID: 0}
