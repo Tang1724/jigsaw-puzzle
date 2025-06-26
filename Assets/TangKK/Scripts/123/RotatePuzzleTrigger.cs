@@ -57,7 +57,10 @@ public class RotatePuzzleTrigger : MonoBehaviour
 
             if (piece.currentGroup != null)
             {
-                piece.currentGroup.RotateGroup(rotationAngle);
+                foreach (var p in piece.currentGroup.pieces)
+                {
+                    p.RotateSelf(rotationAngle);
+                }
             }
             else
             {
