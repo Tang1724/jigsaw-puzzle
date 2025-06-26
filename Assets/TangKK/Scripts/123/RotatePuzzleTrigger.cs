@@ -55,6 +55,7 @@ public class RotatePuzzleTrigger : MonoBehaviour
                 return;
             }
 
+            // ✅ 执行旋转
             if (piece.currentGroup != null)
             {
                 foreach (var p in piece.currentGroup.pieces)
@@ -67,7 +68,8 @@ public class RotatePuzzleTrigger : MonoBehaviour
                 piece.RotateSelf(rotationAngle);
             }
 
-            RefreshAllPaths();
+            // ✅ 在旋转后强制重新组织连接关系并刷新路径
+            ReorganizeAndRefreshAll();
 
             hasTriggered = true;
         }
@@ -77,6 +79,21 @@ public class RotatePuzzleTrigger : MonoBehaviour
         }
 
         playerInside = false;
+    }
+
+    /// <summary>
+    /// ✅ 旋转后重新组织拼图组，并刷新路径（确保逻辑正确）
+    /// </summary>
+    private void ReorganizeAndRefreshAll()
+    {
+        PuzzlePiece[] allPieces = FindObjectsOfType<PuzzlePiece>();
+        foreach (var piece in allPieces)
+        {
+            piece.ReorganizeConnectedPuzzles(); // 重新组织组
+            piece.RefreshPath();                // 刷新路径
+        }
+
+        RefreshAllPaths();
     }
 
     /// <summary>

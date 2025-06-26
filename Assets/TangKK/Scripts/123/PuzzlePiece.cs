@@ -421,7 +421,7 @@ public class PuzzlePiece : MonoBehaviour
     /// <summary>
     /// ✅ 新方法：重新组织所有连接的拼图，确保物理连接的拼图都在同一组（支持多玩家）
     /// </summary>
-    private void ReorganizeConnectedPuzzles()
+    public void ReorganizeConnectedPuzzles()
     {
         PuzzlePiece[] allPieces = FindObjectsOfType<PuzzlePiece>();
         var unprocessed = new List<PuzzlePiece>(allPieces);
@@ -732,7 +732,7 @@ public class PuzzlePiece : MonoBehaviour
         return player.transform.IsChildOf(this.transform);
     }
 
-    private void RefreshPath()
+    public void RefreshPath()
     {
         // ✅ 刷新所有PathMover的路径，而不是只有第一个
         PathMover[] allMovers = FindObjectsOfType<PathMover>();
