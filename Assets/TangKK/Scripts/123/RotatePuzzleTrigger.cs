@@ -44,31 +44,40 @@ public class RotatePuzzleTrigger : MonoBehaviour
 
         if (crossedThrough)
         {
-            Debug.Log("[RotateTrigger] 玩家完整穿过触发器，触发旋转");
+            Debug.Log("[RotateTrigger] 玩家完整穿过触发器，尝试触发旋转");
 
             var player = other.gameObject;
-            var piece = player.GetComponentInParent<PuzzlePiece>();
+            var playerPiece = player.GetComponentInParent<PuzzlePiece>();
 
-            if (piece == null)
+            if (playerPiece == null)
             {
-                Debug.LogWarning("[RotateTrigger] 无法从玩家找到 PuzzlePiece");
+                Debug.LogWarning("[RotateTrigger] 无法找到玩家关联的 PuzzlePiece");
+                return;
+            }
+
+            // ✅ 获取玩家所在的组
+            var playerGroup = playerPiece.currentGroup;
+            if (playerGroup == null)
+            {
+                Debug.LogWarning("[RotateTrigger] 玩家未处于任何拼图组，无法触发旋转");
+                return;
+            }
+
+            // ✅ 检查触发器是否处于同一个组的拼图上
+            var thisPiece = GetComponentInParent<PuzzlePiece>();
+            if (thisPiece != null && thisPiece.currentGroup != playerGroup)
+            {
+                Debug.Log("[RotateTrigger] 触发器不属于玩家所在的拼图组，忽略旋转");
                 return;
             }
 
             // ✅ 执行旋转
-            if (piece.currentGroup != null)
-            {
-                foreach (var p in piece.currentGroup.pieces)
-                {
-                    p.RotateSelf(rotationAngle);
-                }
-            }
-            else
+            foreach (var piece in playerGroup.pieces)
             {
                 piece.RotateSelf(rotationAngle);
             }
 
-            // ✅ 在旋转后强制重新组织连接关系并刷新路径
+            // ✅ 旋转后重新组织并刷新
             ReorganizeAndRefreshAll();
 
             hasTriggered = true;
@@ -106,12 +115,13 @@ public class RotatePuzzleTrigger : MonoBehaviour
             node.RefreshPathLines();
         }
 
-        var mover = FindObjectOfType<PathMover>();
-        if (mover != null)
+        // ✅ 更新所有玩家的 PathMover（支持多人）
+        PathMover[] allMovers = FindObjectsOfType<PathMover>();
+        foreach (var mover in allMovers)
         {
             mover.RefreshPaths();
         }
 
-        Debug.Log("[RotateTrigger] 已刷新所有路径线段和路径缓存");
+        Debug.Log("[RotateTrigger] ✅ 已刷新所有路径线段和所有玩家的路径缓存");
     }
 }

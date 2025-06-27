@@ -11,20 +11,9 @@ public class PlayerSplitterTrigger : MonoBehaviour
     [Header("玩家预制体（必须包含 PathMover + PuzzlePiece）")]
     public GameObject playerPrefab;
 
-    [Header("触发方向设置")]
-    public TriggerDirection triggerDirection = TriggerDirection.LeftToRight;
-
     [Header("调试选项")]
     public bool debugMode = true;
     public bool showDirectionArrow = true;
-
-    public enum TriggerDirection
-    {
-        LeftToRight,
-        RightToLeft,
-        TopToBottom,
-        BottomToTop
-    }
 
     private Dictionary<GameObject, Vector3> playersInTrigger = new Dictionary<GameObject, Vector3>();
 
@@ -56,36 +45,32 @@ public class PlayerSplitterTrigger : MonoBehaviour
 
         Vector3 enterPosition = playersInTrigger[player];
         Vector3 exitPosition = player.transform.position;
+        Vector3 center = GetComponent<Collider2D>().bounds.center;
 
-        if (IsValidDirection(enterPosition, exitPosition))
+        Vector3 toEnter = enterPosition - center;
+        Vector3 toExit = exitPosition - center;
+
+        float dot = Vector3.Dot(toEnter.normalized, toExit.normalized);
+        bool passedThrough = dot < 0f;
+
+        if (passedThrough)
         {
             if (debugMode)
             {
-                Debug.Log($"[PlayerSplitter] ✅ 玩家 {player.name} 触发分流器！");
+                Debug.Log($"[PlayerSplitter] ✅ 玩家 {player.name} 完整穿过触发器，触发分裂！");
             }
 
             SplitPlayer(player);
         }
+        else
+        {
+            if (debugMode)
+            {
+                Debug.Log($"[PlayerSplitter] ❌ 玩家 {player.name} 未完整穿过触发器，忽略");
+            }
+        }
 
         playersInTrigger.Remove(player);
-    }
-
-    private bool IsValidDirection(Vector3 enterPos, Vector3 exitPos)
-    {
-        Vector3 movement = exitPos - enterPos;
-        switch (triggerDirection)
-        {
-            case TriggerDirection.LeftToRight:
-                return movement.x > 0.1f;
-            case TriggerDirection.RightToLeft:
-                return movement.x < -0.1f;
-            case TriggerDirection.TopToBottom:
-                return movement.y < -0.1f;
-            case TriggerDirection.BottomToTop:
-                return movement.y > 0.1f;
-            default:
-                return false;
-        }
     }
 
     private void SplitPlayer(GameObject originalPlayer)
@@ -113,7 +98,6 @@ public class PlayerSplitterTrigger : MonoBehaviour
             groupID = groupID
         };
 
-        // ✅ 改为隐藏原始玩家而不是销毁
         originalPlayer.SetActive(false);
 
         SpawnNewPlayer(spawnNodeA, originalData, "A");
@@ -172,8 +156,8 @@ public class PlayerSplitterTrigger : MonoBehaviour
 
         RefreshAllPathNodeGroupIDs();
 
-        var mover = newPlayer.GetComponent<PathMover>();
-        var piece = newPlayer.GetComponentInParent<PuzzlePiece>();
+        PathMover mover = newPlayer.GetComponent<PathMover>();
+        PuzzlePiece piece = newPlayer.GetComponentInParent<PuzzlePiece>();
         if (mover != null && piece != null)
         {
             mover.ForceUpdateGroupID(piece.GroupID);
@@ -258,37 +242,5 @@ public class PlayerSplitterTrigger : MonoBehaviour
 
         Gizmos.color = new Color(1, 1, 0, 0.3f);
         Gizmos.DrawCube(center, size);
-
-        Gizmos.color = Color.red;
-        Vector3 arrowStart = center;
-        Vector3 arrowEnd = center;
-
-        switch (triggerDirection)
-        {
-            case TriggerDirection.LeftToRight:
-                arrowStart.x -= size.x * 0.3f;
-                arrowEnd.x += size.x * 0.3f;
-                break;
-            case TriggerDirection.RightToLeft:
-                arrowStart.x += size.x * 0.3f;
-                arrowEnd.x -= size.x * 0.3f;
-                break;
-            case TriggerDirection.TopToBottom:
-                arrowStart.y += size.y * 0.3f;
-                arrowEnd.y -= size.y * 0.3f;
-                break;
-            case TriggerDirection.BottomToTop:
-                arrowStart.y -= size.y * 0.3f;
-                arrowEnd.y += size.y * 0.3f;
-                break;
-        }
-
-        Gizmos.DrawLine(arrowStart, arrowEnd);
-        Vector3 direction = (arrowEnd - arrowStart).normalized;
-        Vector3 arrowHead1 = arrowEnd - direction * 0.2f + Vector3.Cross(direction, Vector3.forward) * 0.1f;
-        Vector3 arrowHead2 = arrowEnd - direction * 0.2f - Vector3.Cross(direction, Vector3.forward) * 0.1f;
-
-        Gizmos.DrawLine(arrowEnd, arrowHead1);
-        Gizmos.DrawLine(arrowEnd, arrowHead2);
     }
 }
