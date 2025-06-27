@@ -18,6 +18,10 @@ public class PuzzlePiece : MonoBehaviour
     [HideInInspector]
     public int originalGroupID;
 
+    // ✅ 新增：记录拖拽开始时的原始位置
+    [HideInInspector]
+    public Vector3 originalPosition;
+
     /// <summary>
     /// 当前拼图所属的组 ID（用于路径判断）
     /// </summary>
@@ -36,10 +40,17 @@ public class PuzzlePiece : MonoBehaviour
     public float snapTolerance = 0.3f; // 吸附容差距离
     public bool isSnapSuccessful = false; // 用于观察吸附是否成功
 
+    [Header("重叠检测设置")]
+    public float overlapCheckTolerance = 0.05f; // 重叠检测容差，比物理连接更严格
+
     private void OnMouseDown()
     {
         isDragging = true;
         SetFrozen(true);
+        
+        // ✅ 记录开始拖拽时的原始位置
+        originalPosition = transform.position;
+        
         offsetFromMouse = transform.position - GetMouseWorldPos();
 
         if (currentGroup != null)
@@ -70,6 +81,83 @@ public class PuzzlePiece : MonoBehaviour
             // ✅ 立即刷新路径和UI
             ForceImmediateRefresh();
         }
+    }
+
+    /// <summary>
+    /// ✅ 检测当前拼图是否与其他拼图重叠（不包括正确的吸附位置）
+    /// </summary>
+    private bool IsOverlappingWithOthers()
+    {
+        PuzzlePiece[] allPieces = FindObjectsOfType<PuzzlePiece>();
+        
+        foreach (var other in allPieces)
+        {
+            if (other == this) continue;
+            
+            // 获取两个拼图的边界
+            Bounds myBounds = GetComponent<Renderer>().bounds;
+            Bounds otherBounds = other.GetComponent<Renderer>().bounds;
+            
+            // 检查边界是否重叠
+            if (myBounds.Intersects(otherBounds))
+            {
+                // ✅ 更精确的重叠检查：计算中心点距离
+                Vector3 myPos = transform.position;
+                Vector3 otherPos = other.transform.position;
+                float distance = Vector3.Distance(myPos, otherPos);
+                
+                Vector3 mySize = myBounds.size;
+                Vector3 otherSize = otherBounds.size;
+                float minAllowedDistance = (mySize.magnitude + otherSize.magnitude) / 4f;
+                
+                // 如果距离太近且不是有效的吸附位置，认为是重叠
+                if (distance < minAllowedDistance && !IsValidSnapPosition(other))
+                {
+                    Debug.Log($"[重叠检测] {name} 与 {other.name} 重叠，距离：{distance:F3}，最小距离：{minAllowedDistance:F3}");
+                    return true;
+                }
+            }
+        }
+        
+        return false;
+    }
+
+    /// <summary>
+    /// ✅ 检查当前位置是否是与目标拼图的有效吸附位置
+    /// </summary>
+    private bool IsValidSnapPosition(PuzzlePiece other)
+    {
+        Vector3 mySize = GetComponent<Renderer>().bounds.size;
+        Vector3 otherSize = other.GetComponent<Renderer>().bounds.size;
+
+        Vector3 myPos = transform.position;
+        Vector3 otherPos = other.transform.position;
+
+        Vector3 offset = myPos - otherPos;
+
+        float expectedX = (mySize.x + otherSize.x) / 2f;
+        float expectedY = (mySize.y + otherSize.y) / 2f;
+
+        // 检查水平连接的有效性
+        float xDiff = Mathf.Abs(Mathf.Abs(offset.x) - expectedX);
+        float yDiff = Mathf.Abs(offset.y);
+        bool validHorizontal = xDiff < overlapCheckTolerance && yDiff < overlapCheckTolerance;
+
+        // 检查垂直连接的有效性
+        float yDiff2 = Mathf.Abs(Mathf.Abs(offset.y) - expectedY);
+        float xDiff2 = Mathf.Abs(offset.x);
+        bool validVertical = yDiff2 < overlapCheckTolerance && xDiff2 < overlapCheckTolerance;
+
+        return validHorizontal || validVertical;
+    }
+
+    /// <summary>
+    /// ✅ 返回到原始位置
+    /// </summary>
+    private void ReturnToOriginalPosition()
+    {
+        transform.position = originalPosition;
+        Debug.Log($"[位置恢复] {name} 返回到原始位置: {originalPosition}");
     }
 
     /// <summary>
@@ -381,11 +469,12 @@ public class PuzzlePiece : MonoBehaviour
         isDragging = false;
         SetFrozen(false);
 
-        Debug.Log($"[OnMouseUp] {name} 鼠标释放，开始检查吸附");
+        Debug.Log($"[OnMouseUp] {name} 鼠标释放，开始检查吸附和重叠");
 
         bool foundSnap = false;
         PuzzlePiece[] allPieces = FindObjectsOfType<PuzzlePiece>();
 
+        // 首先尝试吸附
         foreach (var other in allPieces)
         {
             if (other == this) continue;
@@ -402,10 +491,20 @@ public class PuzzlePiece : MonoBehaviour
             }
         }
 
+        // ✅ 如果没有成功吸附，检查是否重叠
         if (!foundSnap)
         {
-            isSnapSuccessful = false;
-            Debug.Log($"[吸附失败] {name} 没有找到可吸附的拼图");
+            if (IsOverlappingWithOthers())
+            {
+                Debug.Log($"[重叠处理] {name} 与其他拼图重叠，返回原始位置");
+                ReturnToOriginalPosition();
+                isSnapSuccessful = false;
+            }
+            else
+            {
+                Debug.Log($"[正常放置] {name} 没有重叠，保持当前位置");
+                isSnapSuccessful = false;
+            }
         }
 
         // ✅ 由于OnMouseDown时已经创建了独立组，这里只需要确认
@@ -665,6 +764,38 @@ public class PuzzlePiece : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// ✅ 检查指定位置是否被其他拼图占用
+    /// </summary>
+    private bool IsPositionOccupied(Vector3 targetPosition, PuzzlePiece excludePiece = null)
+    {
+        PuzzlePiece[] allPieces = FindObjectsOfType<PuzzlePiece>();
+        Vector3 mySize = GetComponent<Renderer>().bounds.size;
+        
+        foreach (var piece in allPieces)
+        {
+            // 排除自己和指定的拼图
+            if (piece == this || piece == excludePiece) continue;
+            
+            Vector3 piecePos = piece.transform.position;
+            Vector3 pieceSize = piece.GetComponent<Renderer>().bounds.size;
+            
+            // 计算两个拼图中心点的距离
+            float distance = Vector3.Distance(targetPosition, piecePos);
+            
+            // 如果距离小于两个拼图大小的平均值，认为位置被占用
+            float minDistance = (mySize.magnitude + pieceSize.magnitude) / 4f; // 使用1/4而不是1/2，更严格一些
+            
+            if (distance < minDistance)
+            {
+                Debug.Log($"[位置占用检查] 目标位置 {targetPosition} 被 {piece.name} 占用，距离：{distance:F3}，最小距离：{minDistance:F3}");
+                return true;
+            }
+        }
+        
+        return false;
+    }
+
     private bool TrySnapTo(PuzzlePiece other)
     {
         Vector3 mySize = GetComponent<Renderer>().bounds.size;
@@ -679,6 +810,7 @@ public class PuzzlePiece : MonoBehaviour
         float expectedY = (mySize.y + otherSize.y) / 2f;
 
         bool snapped = false;
+        Vector3 targetPosition = Vector3.zero;
 
         // 检查水平连接
         float xDiff = Mathf.Abs(Mathf.Abs(offset.x) - expectedX);
@@ -688,8 +820,19 @@ public class PuzzlePiece : MonoBehaviour
         if (horizontalCheck)
         {
             float newX = otherPos.x + Mathf.Sign(offset.x) * expectedX;
-            transform.position = new Vector3(newX, otherPos.y, myPos.z);
-            snapped = true;
+            targetPosition = new Vector3(newX, otherPos.y, myPos.z);
+            
+            // ✅ 检查目标位置是否被占用
+            if (!IsPositionOccupied(targetPosition, other))
+            {
+                transform.position = targetPosition;
+                snapped = true;
+                Debug.Log($"[水平吸附成功] {name} 吸附到 {other.name} 的侧面，位置：{targetPosition}");
+            }
+            else
+            {
+                Debug.Log($"[水平吸附失败] {name} 无法吸附到 {other.name}，目标位置被占用");
+            }
         }
         else
         {
@@ -701,8 +844,19 @@ public class PuzzlePiece : MonoBehaviour
             if (verticalCheck)
             {
                 float newY = otherPos.y + Mathf.Sign(offset.y) * expectedY;
-                transform.position = new Vector3(otherPos.x, newY, myPos.z);
-                snapped = true;
+                targetPosition = new Vector3(otherPos.x, newY, myPos.z);
+                
+                // ✅ 检查目标位置是否被占用
+                if (!IsPositionOccupied(targetPosition, other))
+                {
+                    transform.position = targetPosition;
+                    snapped = true;
+                    Debug.Log($"[垂直吸附成功] {name} 吸附到 {other.name} 的上下方，位置：{targetPosition}");
+                }
+                else
+                {
+                    Debug.Log($"[垂直吸附失败] {name} 无法吸附到 {other.name}，目标位置被占用");
+                }
             }
         }
 
