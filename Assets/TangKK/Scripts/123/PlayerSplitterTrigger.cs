@@ -15,6 +15,10 @@ public class PlayerSplitterTrigger : MonoBehaviour
     public bool debugMode = true;
     public bool showDirectionArrow = true;
 
+    [Header("🔒 组权限设置")]
+    public bool requireSameGroup = true; // 是否要求同组才能触发
+    public bool showGroupInfo = true;    // 是否显示组信息用于调试
+
     private Dictionary<GameObject, Vector3> playersInTrigger = new Dictionary<GameObject, Vector3>();
 
     private void Awake()
@@ -33,6 +37,11 @@ public class PlayerSplitterTrigger : MonoBehaviour
         if (debugMode)
         {
             Debug.Log($"[PlayerSplitter] 🎯 玩家 {player.name} 进入触发器，位置: {player.transform.position}");
+            
+            if (showGroupInfo)
+            {
+                LogGroupInformation(player);
+            }
         }
     }
 
@@ -57,7 +66,23 @@ public class PlayerSplitterTrigger : MonoBehaviour
         {
             if (debugMode)
             {
-                Debug.Log($"[PlayerSplitter] ✅ 玩家 {player.name} 完整穿过触发器，触发分裂！");
+                Debug.Log($"[PlayerSplitter] ✅ 玩家 {player.name} 完整穿过触发器");
+            }
+
+            // 🔒 检查组权限
+            if (requireSameGroup && !CheckGroupPermission(player))
+            {
+                if (debugMode)
+                {
+                    Debug.Log($"[PlayerSplitter] 🚫 玩家 {player.name} 不属于同一组，拒绝分裂触发");
+                }
+                playersInTrigger.Remove(player);
+                return;
+            }
+
+            if (debugMode)
+            {
+                Debug.Log($"[PlayerSplitter] 🎉 触发分裂！玩家：{player.name}");
             }
 
             SplitPlayer(player);
@@ -73,6 +98,132 @@ public class PlayerSplitterTrigger : MonoBehaviour
         playersInTrigger.Remove(player);
     }
 
+    /// <summary>
+    /// 🔒 检查玩家是否与触发器属于同一个拼图组
+    /// </summary>
+    private bool CheckGroupPermission(GameObject player)
+    {
+        // 获取玩家所在的拼图组信息
+        var playerPiece = player.GetComponentInParent<PuzzlePiece>();
+        if (playerPiece == null)
+        {
+            if (debugMode)
+            {
+                Debug.LogWarning($"[组权限检查] 玩家 {player.name} 没有关联的 PuzzlePiece");
+            }
+            return false; // 没有拼图组信息的玩家不能触发
+        }
+
+        // 获取玩家所在的组
+        var playerGroup = playerPiece.currentGroup;
+        int playerGroupID = playerPiece.GroupID;
+
+        // 获取触发器所在的拼图组信息
+        var triggerPiece = GetComponentInParent<PuzzlePiece>();
+        if (triggerPiece == null)
+        {
+            if (debugMode)
+            {
+                Debug.LogWarning($"[组权限检查] 触发器 {name} 没有关联的 PuzzlePiece");
+            }
+            return false; // 触发器不在拼图上，不允许触发
+        }
+
+        var triggerGroup = triggerPiece.currentGroup;
+        int triggerGroupID = triggerPiece.GroupID;
+
+        // 🔍 详细的组检查逻辑
+        bool sameGroup = false;
+
+        // 方法1：通过组ID比较
+        if (playerGroupID == triggerGroupID && playerGroupID != -1)
+        {
+            sameGroup = true;
+            if (debugMode)
+            {
+                Debug.Log($"[组权限检查] ✅ 组ID匹配：玩家组 {playerGroupID} == 触发器组 {triggerGroupID}");
+            }
+        }
+        // 方法2：通过组对象比较
+        else if (playerGroup != null && triggerGroup != null && playerGroup == triggerGroup)
+        {
+            sameGroup = true;
+            if (debugMode)
+            {
+                Debug.Log($"[组权限检查] ✅ 组对象匹配：玩家组 {playerGroup.name} == 触发器组 {triggerGroup.name}");
+            }
+        }
+        // 方法3：检查是否物理连接（作为备用方案）
+        else if (playerPiece.IsPhysicallyConnected(playerPiece, triggerPiece))
+        {
+            sameGroup = true;
+            if (debugMode)
+            {
+                Debug.Log($"[组权限检查] ✅ 物理连接：玩家拼图与触发器拼图物理连接");
+            }
+        }
+
+        if (!sameGroup && debugMode)
+        {
+            Debug.Log($"[组权限检查] ❌ 组不匹配：玩家组 {playerGroupID}({playerGroup?.name}) ≠ 触发器组 {triggerGroupID}({triggerGroup?.name})");
+        }
+
+        return sameGroup;
+    }
+
+    /// <summary>
+    /// 🔍 记录组信息用于调试
+    /// </summary>
+    private void LogGroupInformation(GameObject player)
+    {
+        var playerPiece = player.GetComponentInParent<PuzzlePiece>();
+        var triggerPiece = GetComponentInParent<PuzzlePiece>();
+
+        Debug.Log("=== 组信息调试 ===");
+        
+        if (playerPiece != null)
+        {
+            Debug.Log($"👤 玩家 {player.name}:");
+            Debug.Log($"   - 拼图: {playerPiece.name}");
+            Debug.Log($"   - 组ID: {playerPiece.GroupID}");
+            Debug.Log($"   - 初始组ID: {playerPiece.initialGroupID}");
+            Debug.Log($"   - 当前组: {(playerPiece.currentGroup?.name ?? "无")}");
+        }
+        else
+        {
+            Debug.Log($"👤 玩家 {player.name}: 无关联拼图");
+        }
+
+        if (triggerPiece != null)
+        {
+            Debug.Log($"🎯 触发器 {name}:");
+            Debug.Log($"   - 拼图: {triggerPiece.name}");
+            Debug.Log($"   - 组ID: {triggerPiece.GroupID}");
+            Debug.Log($"   - 初始组ID: {triggerPiece.initialGroupID}");
+            Debug.Log($"   - 当前组: {(triggerPiece.currentGroup?.name ?? "无")}");
+        }
+        else
+        {
+            Debug.Log($"🎯 触发器 {name}: 无关联拼图");
+        }
+
+        Debug.Log("==================");
+    }
+
+    /// <summary>
+    /// 🔒 获取有效的目标节点组ID（确保分裂后的玩家在正确的组中）
+    /// </summary>
+    private int GetValidTargetGroupID(PathNode targetNode, int originalGroupID)
+    {
+        if (targetNode?.parentPiece != null)
+        {
+            return targetNode.parentPiece.GroupID;
+        }
+        
+        // 如果目标节点没有有效的组ID，使用原始组ID
+        return originalGroupID;
+    }
+
     private void SplitPlayer(GameObject originalPlayer)
     {
         if (spawnNodeA == null || spawnNodeB == null || playerPrefab == null)
@@ -82,7 +233,7 @@ public class PlayerSplitterTrigger : MonoBehaviour
         }
 
         PuzzlePiece oldPiece = originalPlayer.GetComponentInParent<PuzzlePiece>();
-        int groupID = oldPiece != null ? oldPiece.GroupID : -1;
+        int originalGroupID = oldPiece != null ? oldPiece.GroupID : -1;
 
         SpriteRenderer originalSprite = originalPlayer.GetComponent<SpriteRenderer>();
         PathMover originalMover = originalPlayer.GetComponent<PathMover>();
@@ -95,13 +246,22 @@ public class PlayerSplitterTrigger : MonoBehaviour
             sortingOrder = originalSprite?.sortingOrder ?? 0,
             scale = originalPlayer.transform.localScale,
             worldScale = originalPlayer.transform.lossyScale,
-            groupID = groupID
+            groupID = originalGroupID
         };
 
         originalPlayer.SetActive(false);
 
-        SpawnNewPlayer(spawnNodeA, originalData, "A");
-        SpawnNewPlayer(spawnNodeB, originalData, "B");
+        // 🔒 确保新玩家在正确的组中
+        int groupID_A = GetValidTargetGroupID(spawnNodeA, originalGroupID);
+        int groupID_B = GetValidTargetGroupID(spawnNodeB, originalGroupID);
+
+        if (debugMode)
+        {
+            Debug.Log($"[分裂] 原始组ID: {originalGroupID}, 目标A组ID: {groupID_A}, 目标B组ID: {groupID_B}");
+        }
+
+        SpawnNewPlayer(spawnNodeA, originalData, "A", groupID_A);
+        SpawnNewPlayer(spawnNodeB, originalData, "B", groupID_B);
     }
 
     private struct PlayerData
@@ -115,7 +275,7 @@ public class PlayerSplitterTrigger : MonoBehaviour
         public int groupID;
     }
 
-    private void SpawnNewPlayer(PathNode node, PlayerData originalData, string label)
+    private void SpawnNewPlayer(PathNode node, PlayerData originalData, string label, int targetGroupID)
     {
         if (node == null)
         {
@@ -144,8 +304,9 @@ public class PlayerSplitterTrigger : MonoBehaviour
             );
         }
 
-        SetupPathMover(newPlayer, node, originalData.groupID, label);
-        SetupPuzzlePiece(newPlayer, originalData.groupID, label);
+        // 🔒 使用正确的目标组ID
+        SetupPathMover(newPlayer, node, targetGroupID, label);
+        SetupPuzzlePiece(newPlayer, targetGroupID, label);
         EnableAllComponents(newPlayer, label);
 
         foreach (var pNode in newPlayer.GetComponentsInChildren<PathNode>())
@@ -160,8 +321,13 @@ public class PlayerSplitterTrigger : MonoBehaviour
         PuzzlePiece piece = newPlayer.GetComponentInParent<PuzzlePiece>();
         if (mover != null && piece != null)
         {
-            mover.ForceUpdateGroupID(piece.GroupID);
+            mover.ForceUpdateGroupID(targetGroupID);
             mover.RefreshPaths();
+        }
+
+        if (debugMode)
+        {
+            Debug.Log($"[分裂完成] 生成玩家 {newPlayer.name}，目标组ID: {targetGroupID}");
         }
     }
 
@@ -240,7 +406,25 @@ public class PlayerSplitterTrigger : MonoBehaviour
             size = new Vector3(diameter, diameter, 1);
         }
 
-        Gizmos.color = new Color(1, 1, 0, 0.3f);
+        // 🔒 根据权限要求改变颜色
+        Color gizmoColor = requireSameGroup ? new Color(1, 0.5f, 0, 0.3f) : new Color(1, 1, 0, 0.3f);
+        Gizmos.color = gizmoColor;
         Gizmos.DrawCube(center, size);
+
+        // 🔍 显示组信息（如果启用调试）
+        if (showGroupInfo && debugMode)
+        {
+            var triggerPiece = GetComponentInParent<PuzzlePiece>();
+            if (triggerPiece != null)
+            {
+                Gizmos.color = Color.white;
+                Vector3 textPos = center + Vector3.up * (size.y / 2 + 0.2f);
+                
+                // 在编辑器中显示组ID
+                #if UNITY_EDITOR
+                UnityEditor.Handles.Label(textPos, $"组ID: {triggerPiece.GroupID}");
+                #endif
+            }
+        }
     }
 }
